@@ -184,63 +184,61 @@ class Client {
             headers: { Authorization: `Basic ${encodedToken}` },
         });
     }
-    getProjectId(projectKey) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const result = yield this.client.get(`/project/${projectKey}`);
-                return result.data.id;
-            }
-            catch (error) {
-                if (error.response) {
-                    throw new Error(JSON.stringify(error.response, null, 4));
-                }
-                throw error;
-            }
-        });
-    }
-    getIssueTypesForProject(projectKey) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const projectId = yield this.getProjectId(projectKey);
-                const response = yield this.client.get(`/issuetype/project?projectId=${projectId}`);
-                return [
-                    ...new Set(response.data
-                        .filter((item) => item.level !== 1)
-                        .map((item) => item.name)),
-                ];
-                // const issue: JIRA.Issue = await this.getIssue(key);
-                // const {
-                //   fields: { issuetype: type, project, summary },
-                // } = issue;
-                // return {
-                //   key,
-                //   summary,
-                //   url: `${this.jiraBaseUrl}/browse/${key}`,
-                //   type: {
-                //     name: type.name,
-                //     icon: type.iconUrl,
-                //   },
-                //   project: {
-                //     name: project.name,
-                //     url: `${this.jiraBaseUrl}/browse/${project.key}`,
-                //     key: project.key,
-                //   },
-                // };
-            }
-            catch (error) {
-                if (error.response) {
-                    throw new Error(JSON.stringify(error.response, null, 4));
-                }
-                throw error;
-            }
-        });
-    }
+    // async getProjectId(projectKey: string): Promise<number | undefined> {
+    //   try {
+    //     const result = await this.client.get(`/project/${projectKey}`);
+    //     return result.data.id;
+    //   } catch (error: any) {
+    //     if (error.response) {
+    //       throw new Error(JSON.stringify(error.response, null, 4));
+    //     }
+    //     throw error;
+    //   }
+    // }
+    // async getIssueTypesForProject(projectKey: string): Promise<string[]> {
+    //   try {
+    //     const projectId = await this.getProjectId(projectKey);
+    //     const response = await this.client.get(
+    //       `/issuetype/project?projectId=${projectId}`
+    //     );
+    //     return [
+    //       ...new Set<string>(
+    //         response.data
+    //           .filter((item) => item.level !== 1)
+    //           .map((item) => item.name)
+    //       ),
+    //     ];
+    //     // const issue: JIRA.Issue = await this.getIssue(key);
+    //     // const {
+    //     //   fields: { issuetype: type, project, summary },
+    //     // } = issue;
+    //     // return {
+    //     //   key,
+    //     //   summary,
+    //     //   url: `${this.jiraBaseUrl}/browse/${key}`,
+    //     //   type: {
+    //     //     name: type.name,
+    //     //     icon: type.iconUrl,
+    //     //   },
+    //     //   project: {
+    //     //     name: project.name,
+    //     //     url: `${this.jiraBaseUrl}/browse/${project.key}`,
+    //     //     key: project.key,
+    //     //   },
+    //     // };
+    //   } catch (error: any) {
+    //     if (error.response) {
+    //       throw new Error(JSON.stringify(error.response, null, 4));
+    //     }
+    //     throw error;
+    //   }
+    // }
     getIssueType(id) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const response = yield this.client.get(`/issue/${id}?fields=issuetype`);
-                console.log(response);
-                return response.data.fields.issuetype.name;
+                return (_a = response.data.fields.issuetype.name) === null || _a === void 0 ? void 0 : _a.toLowerCase();
             }
             catch (error) {
                 if (error.response) {
@@ -320,21 +318,33 @@ function run() {
             return;
         }
         const jiraClient = new jira.Client(jiraToken, jiraBaseUrl);
-        const issueTypes = yield jiraClient.getIssueTypesForProject(jiraProjectKey);
-        core.info(`Issue Types: ${issueTypes.join(", ")}`);
+        // const issueTypes = await jiraClient.getIssueTypesForProject(jiraProjectKey);
+        // core.info(`Issue Types: ${issueTypes.join(", ")}`);
         const formattedJiraKey = `${jiraProjectKey}-${jiraKey}`;
         core.info(`📄 PR Number: ${jiraProjectKey}-${jiraKey}`);
         core.info(`📄 Jira key: ${formattedJiraKey}`);
         const issueType = yield jiraClient.getIssueType(formattedJiraKey);
         core.info(`📄 Issue type: ${issueType}`);
+        if (!issueType) {
+            console.log("Could not get issue type, exiting");
+            return;
+        }
         // TODO: create label if it doesn't exist
+        core.info(`📄 Creating label: ${issueType}`);
+        yield client.rest.issues.createLabel({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            name: issueType,
+            color: "#FBCA04",
+        });
         // TODO: add label to pull request (not overwriting existing ones)
-        // core.info(`🏭 Running labeler for ${prNumber}`);
-        // await runLabeler(client, configPath, prNumber);
-        // core.info(`🏭 Running assigner for ${prNumber}`);
-        // await runAssigner(client, configPath, prNumber);
-        // core.info(`🏭 Running owner for ${prNumber}`);
-        // await runOwner(client, prNumber);
+        core.info(`📄 Adding label: ${issueType} to: ${prNumber}`);
+        yield client.rest.issues.addLabels({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            issue_number: prNumber,
+            labels: [issueType],
+        });
         core.info(`📄 Finished for ${prNumber}`);
     });
 }

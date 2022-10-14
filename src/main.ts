@@ -29,8 +29,8 @@ export async function run() {
   }
 
   const jiraClient = new jira.Client(jiraToken, jiraBaseUrl);
-  const issueTypes = await jiraClient.getIssueTypesForProject(jiraProjectKey);
-  core.info(`Issue Types: ${issueTypes.join(", ")}`);
+  // const issueTypes = await jiraClient.getIssueTypesForProject(jiraProjectKey);
+  // core.info(`Issue Types: ${issueTypes.join(", ")}`);
 
   const formattedJiraKey = `${jiraProjectKey}-${jiraKey}`;
 
@@ -39,19 +39,28 @@ export async function run() {
 
   const issueType = await jiraClient.getIssueType(formattedJiraKey);
   core.info(`📄 Issue type: ${issueType}`);
+  if (!issueType) {
+    console.log("Could not get issue type, exiting");
+    return;
+  }
 
   // TODO: create label if it doesn't exist
+  core.info(`📄 Creating label: ${issueType}`);
+  await client.rest.issues.createLabel({
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
+    name: issueType,
+    color: "#FBCA04",
+  });
 
   // TODO: add label to pull request (not overwriting existing ones)
-
-  // core.info(`🏭 Running labeler for ${prNumber}`);
-  // await runLabeler(client, configPath, prNumber);
-
-  // core.info(`🏭 Running assigner for ${prNumber}`);
-  // await runAssigner(client, configPath, prNumber);
-
-  // core.info(`🏭 Running owner for ${prNumber}`);
-  // await runOwner(client, prNumber);
+  core.info(`📄 Adding label: ${issueType} to: ${prNumber}`);
+  await client.rest.issues.addLabels({
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
+    issue_number: prNumber,
+    labels: [issueType],
+  });
 
   core.info(`📄 Finished for ${prNumber}`);
 }
