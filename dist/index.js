@@ -134,6 +134,25 @@ exports.getPrReviewersAndAssignees = getPrReviewersAndAssignees;
 
 /***/ }),
 
+/***/ 9609:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.jiraKey = void 0;
+function jiraKey(input, jiraProjectKey) {
+    var _a;
+    const pattern = `^${jiraProjectKey}-(?<number>\\d+)`;
+    const regex = new RegExp(pattern, "i");
+    const match = input.match(regex);
+    return (_a = match === null || match === void 0 ? void 0 : match.groups) === null || _a === void 0 ? void 0 : _a.number;
+}
+exports.jiraKey = jiraKey;
+
+
+/***/ }),
+
 /***/ 4438:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -183,9 +202,9 @@ class Client {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const projectId = yield this.getProjectId(projectKey);
-                const result = yield this.client.get(`/issuetype/project?projectId=${projectId}`);
+                const response = yield this.client.get(`/issuetype/project?projectId=${projectId}`);
                 return [
-                    ...new Set(result.data
+                    ...new Set(response.data
                         .filter((item) => item.level !== 1)
                         .map((item) => item.name)),
                 ];
@@ -207,6 +226,21 @@ class Client {
                 //     key: project.key,
                 //   },
                 // };
+            }
+            catch (error) {
+                if (error.response) {
+                    throw new Error(JSON.stringify(error.response, null, 4));
+                }
+                throw error;
+            }
+        });
+    }
+    getIssueType(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const response = yield this.client.get(`/issue/${id}?fields=issuetype`);
+                console.log(response);
+                return response.data.issuetype;
             }
             catch (error) {
                 if (error.response) {
@@ -264,6 +298,7 @@ exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const helpers = __importStar(__nccwpck_require__(6401));
+const extractor = __importStar(__nccwpck_require__(9609));
 const jira = __importStar(__nccwpck_require__(4438));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -271,16 +306,27 @@ function run() {
         const jiraProjectKey = core.getInput("jira-project-key", { required: true });
         const jiraToken = core.getInput("jira-token", { required: true });
         const jiraBaseUrl = core.getInput("jira-base-url", { required: true });
+        const branchName = github.context.ref.replace("refs/heads/", "");
+        core.info(`📄 Branch name: ${branchName}`);
+        const jiraKey = extractor.jiraKey(branchName, jiraProjectKey);
+        if (!jiraKey) {
+            core.info("No Jira key found in branch name, exiting");
+            return;
+        }
         const client = github.getOctokit(token);
         const prNumber = yield helpers.getPrNumber(client);
         if (!prNumber) {
             console.log("Could not get pull request number from context, exiting");
             return;
         }
-        core.info(`📄 Pull Request Number: ${prNumber}`);
         const jiraClient = new jira.Client(jiraToken, jiraBaseUrl);
         const issueTypes = yield jiraClient.getIssueTypesForProject(jiraProjectKey);
         core.info(`Issue Types: ${issueTypes.join(", ")}`);
+        const formattedJiraKey = `${jiraProjectKey}-${jiraKey}`;
+        core.info(`📄 PR Number: ${jiraProjectKey}-${jiraKey}`);
+        core.info(`📄 Jira key: ${formattedJiraKey}`);
+        const issueType = yield jiraClient.getIssueType(formattedJiraKey);
+        core.info(`📄 Issue type: ${issueType}`);
         // core.info(`🏭 Running labeler for ${prNumber}`);
         // await runLabeler(client, configPath, prNumber);
         // core.info(`🏭 Running assigner for ${prNumber}`);

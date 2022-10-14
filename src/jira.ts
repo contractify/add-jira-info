@@ -29,12 +29,12 @@ export class Client {
     try {
       const projectId = await this.getProjectId(projectKey);
 
-      const result = await this.client.get(
+      const response = await this.client.get(
         `/issuetype/project?projectId=${projectId}`
       );
       return [
         ...new Set<string>(
-          result.data
+          response.data
             .filter((item) => item.level !== 1)
             .map((item) => item.name)
         ),
@@ -65,9 +65,16 @@ export class Client {
     }
   }
 
-  // async getIssue(id: string): Promise<JIRA.Issue> {
-  //   const url = `/issue/${id}?fields=project,summary,issuetype`;
-  //   const response = await this.client.get<JIRA.Issue>(url);
-  //   return response.data;
-  // }
+  async getIssueType(id: string): Promise<string | undefined> {
+    try {
+      const response = await this.client.get(`/issue/${id}?fields=issuetype`);
+      console.log(response);
+      return response.data.issuetype;
+    } catch (error: any) {
+      if (error.response) {
+        throw new Error(JSON.stringify(error.response, null, 4));
+      }
+      throw error;
+    }
+  }
 }
