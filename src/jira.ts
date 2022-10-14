@@ -69,7 +69,7 @@ export class Client {
     try {
       const response = await this.client.get(`/issue/${id}?fields=issuetype`);
       console.log(response);
-      return response.data.fields.issueType.name;
+      return response.data.fields.issuetype.name;
     } catch (error: any) {
       if (error.response) {
         throw new Error(JSON.stringify(error.response, null, 4));
