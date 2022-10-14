@@ -7,6 +7,7 @@ import * as jira from "./jira";
 
 export async function run() {
   const token = core.getInput("token", { required: true });
+  const jiraProjectKey = core.getInput("jira-project-key", { required: true });
   const jiraToken = core.getInput("jira-token", { required: true });
   const jiraBaseUrl = core.getInput("jira-base-url", { required: true });
 
@@ -20,8 +21,8 @@ export async function run() {
   core.info(`📄 Pull Request Number: ${prNumber}`);
 
   const jiraClient = new jira.Client(jiraToken, jiraBaseUrl);
-  const issueTypes = await jiraClient.getIssueTypes();
-  core.info(`issueTypes: ${issueTypes.join(", ")}`);
+  const issueTypes = await jiraClient.getIssueTypesForProject(jiraProjectKey);
+  core.info(`Issue Types: ${issueTypes.join(", ")}`);
 
   // core.info(`🏭 Running labeler for ${prNumber}`);
   // await runLabeler(client, configPath, prNumber);

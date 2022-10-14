@@ -24,6 +24,7 @@ jobs:
         token: "${{ secrets.GITHUB_TOKEN }}"
         jira-token: ${{ secrets.JIRA_TOKEN }}
         jira-base-url: https://your-domain.atlassian.net
+        jira-project-key: "PRJ"
 ```
 
 ## Inputs
@@ -35,6 +36,7 @@ Various inputs are defined in [`action.yml`](action.yml) to let you configure th
 | `token` | Token to use to authorize label changes. Typically the GITHUB_TOKEN secret, with `contents:read` and `pull-requests:write` access | N/A |
 | `jira-token` | Token used to fetch Jira Issue information.  Check [below](#jira-token) for more details on how to generate the token. | true     | null    |
 | `jira-base-url` | The subdomain of JIRA cloud that you use to access it. Ex: "https://your-domain.atlassian.net". | true     | null    |
+| `jira-project-key` | TKey of project in jira. First part of issue key | true     | null    |
 
 Tokens are private, so it's suggested adding them as [GitHub secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets).
 

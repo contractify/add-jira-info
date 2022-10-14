@@ -13,10 +13,25 @@ export class Client {
     });
   }
 
-  async getIssueTypes(): Promise<string[]> {
+  async getProjectId(projectKey: string): Promise<number | undefined> {
     try {
-      const result = await this.client.get("/issuetype");
-      // console.log(result.data);
+      const result = await this.client.get(`/project/${projectKey}`);
+      return result.data.id;
+    } catch (error: any) {
+      if (error.response) {
+        throw new Error(JSON.stringify(error.response, null, 4));
+      }
+      throw error;
+    }
+  }
+
+  async getIssueTypesForProject(projectKey: string): Promise<string[]> {
+    try {
+      const projectId = await this.getProjectId(projectKey);
+
+      const result = await this.client.get(
+        `/issuetype/project?projectId=${projectId}`
+      );
       return [
         ...new Set<string>(
           result.data
@@ -48,7 +63,6 @@ export class Client {
       }
       throw error;
     }
-    return [];
   }
 
   // async getIssue(id: string): Promise<JIRA.Issue> {

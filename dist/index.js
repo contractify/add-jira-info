@@ -165,11 +165,25 @@ class Client {
             headers: { Authorization: `Basic ${encodedToken}` },
         });
     }
-    getIssueTypes() {
+    getProjectId(projectKey) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const result = yield this.client.get("/issuetype");
-                // console.log(result.data);
+                const result = yield this.client.get(`/project/${projectKey}`);
+                return result.data.id;
+            }
+            catch (error) {
+                if (error.response) {
+                    throw new Error(JSON.stringify(error.response, null, 4));
+                }
+                throw error;
+            }
+        });
+    }
+    getIssueTypesForProject(projectKey) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const projectId = yield this.getProjectId(projectKey);
+                const result = yield this.client.get(`/issuetype/project?projectId=${projectId}`);
                 return [
                     ...new Set(result.data
                         .filter((item) => item.level !== 1)
@@ -200,7 +214,6 @@ class Client {
                 }
                 throw error;
             }
-            return [];
         });
     }
 }
@@ -255,6 +268,7 @@ const jira = __importStar(__nccwpck_require__(4438));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const token = core.getInput("token", { required: true });
+        const jiraProjectKey = core.getInput("jira-project-key", { required: true });
         const jiraToken = core.getInput("jira-token", { required: true });
         const jiraBaseUrl = core.getInput("jira-base-url", { required: true });
         const client = github.getOctokit(token);
@@ -265,8 +279,8 @@ function run() {
         }
         core.info(`📄 Pull Request Number: ${prNumber}`);
         const jiraClient = new jira.Client(jiraToken, jiraBaseUrl);
-        const issueTypes = yield jiraClient.getIssueTypes();
-        core.info(`issueTypes: ${issueTypes.join(", ")}`);
+        const issueTypes = yield jiraClient.getIssueTypesForProject(jiraProjectKey);
+        core.info(`Issue Types: ${issueTypes.join(", ")}`);
         // core.info(`🏭 Running labeler for ${prNumber}`);
         // await runLabeler(client, configPath, prNumber);
         // core.info(`🏭 Running assigner for ${prNumber}`);
