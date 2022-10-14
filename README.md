@@ -1,6 +1,6 @@
-# Jira issue types to labels
+# Jira issue type to label
 
-Automatically labels your pull request based on Jira issue types.
+Automatically labels your pull request based on Jira issue type.
 
 ```yaml
 name: PR Automation
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Assign Labels and Users
-      uses: contractify/jira-issue-types-to-labels@v1.0.0
+      uses: contractify/jira-issue-type-to-label@v1.0.0
       if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
       with:
         token: "${{ secrets.GITHUB_TOKEN }}"
