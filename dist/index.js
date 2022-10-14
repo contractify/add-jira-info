@@ -169,8 +169,12 @@ class Client {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const result = yield this.client.get("/issuetype");
-                console.log(result.data);
-                return result.data.map((item) => item.name);
+                // console.log(result.data);
+                return [
+                    ...new Set(result.data
+                        .filter((item) => item.level !== 1)
+                        .map((item) => item.name)),
+                ];
                 // const issue: JIRA.Issue = await this.getIssue(key);
                 // const {
                 //   fields: { issuetype: type, project, summary },
