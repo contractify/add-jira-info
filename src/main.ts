@@ -40,6 +40,10 @@ export async function run() {
   const issueType = await jiraClient.getIssueType(formattedJiraKey);
   core.info(`📄 Issue type: ${issueType}`);
 
+  // TODO: create label if it doesn't exist
+
+  // TODO: add label to pull request (not overwriting existing ones)
+
   // core.info(`🏭 Running labeler for ${prNumber}`);
   // await runLabeler(client, configPath, prNumber);
 

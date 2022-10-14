@@ -240,7 +240,7 @@ class Client {
             try {
                 const response = yield this.client.get(`/issue/${id}?fields=issuetype`);
                 console.log(response);
-                return response.data.issuetype;
+                return response.data.fields.issueType.name;
             }
             catch (error) {
                 if (error.response) {
@@ -327,6 +327,8 @@ function run() {
         core.info(`📄 Jira key: ${formattedJiraKey}`);
         const issueType = yield jiraClient.getIssueType(formattedJiraKey);
         core.info(`📄 Issue type: ${issueType}`);
+        // TODO: create label if it doesn't exist
+        // TODO: add label to pull request (not overwriting existing ones)
         // core.info(`🏭 Running labeler for ${prNumber}`);
         // await runLabeler(client, configPath, prNumber);
         // core.info(`🏭 Running assigner for ${prNumber}`);
