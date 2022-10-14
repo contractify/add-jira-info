@@ -1,0 +1,12 @@
+{
+  "emeraldwalk.runonsave": {
+      "commands": [
+          {
+              "match": "\\.(ts|js)$",
+              "cmd": "${workspaceFolder}/node_modules/.bin/prettier --write ${file}",
+              "silent": true,
+          },
+      ]
+  },
+  "task.allowAutomaticTasks": "on"
+}

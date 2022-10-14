@@ -1,0 +1,20 @@
+name: 'Jira issue types to labels'
+description: 'Automatically labels your pull request based on Jira issue types.'
+author: 'GitHub'
+inputs:
+  token:
+    description: 'The GITHUB_TOKEN secret'
+  jira-token:
+    description: 'API Token used to access the JIRA REST API. Must have read access to your JIRA Projects & Issues. Format: <jira username>:<jira token>'
+    required: true
+  jira-base-url:
+    description: 'The subdomain of JIRA cloud that you use to access it. Ex: "https://your-domain.atlassian.net"'
+    required: true
+
+branding:
+  icon: user
+  color: yellow
+
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
