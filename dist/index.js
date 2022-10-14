@@ -168,8 +168,9 @@ class Client {
     getIssueTypes() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const issueTypes = yield this.client.get("/issuetype");
-                console.log(issueTypes.data);
+                const result = yield this.client.get("/issuetype");
+                console.log(result.data);
+                return result.data.map((item) => item.name);
                 // const issue: JIRA.Issue = await this.getIssue(key);
                 // const {
                 //   fields: { issuetype: type, project, summary },
@@ -195,7 +196,7 @@ class Client {
                 }
                 throw error;
             }
-            return undefined;
+            return [];
         });
     }
 }
@@ -247,7 +248,6 @@ const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const helpers = __importStar(__nccwpck_require__(6401));
 const jira = __importStar(__nccwpck_require__(4438));
-// import { runLabeler } from "./labeler/labeler";
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const token = core.getInput("token", { required: true });
@@ -261,14 +261,15 @@ function run() {
         }
         core.info(`📄 Pull Request Number: ${prNumber}`);
         const jiraClient = new jira.Client(jiraToken, jiraBaseUrl);
-        const issueTypes = jiraClient.getIssueTypes();
+        const issueTypes = yield jiraClient.getIssueTypes();
+        core.info(`issueTypes: ${issueTypes.join(", ")}`);
         // core.info(`🏭 Running labeler for ${prNumber}`);
         // await runLabeler(client, configPath, prNumber);
         // core.info(`🏭 Running assigner for ${prNumber}`);
         // await runAssigner(client, configPath, prNumber);
         // core.info(`🏭 Running owner for ${prNumber}`);
         // await runOwner(client, prNumber);
-        // core.info(`📄 Finished for ${prNumber}`);
+        core.info(`📄 Finished for ${prNumber}`);
     });
 }
 exports.run = run;

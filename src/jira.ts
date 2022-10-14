@@ -16,6 +16,7 @@ export class Client {
   async getIssueTypes(): Promise<string[]> {
     try {
       const result = await this.client.get("/issuetype");
+      console.log(result.data);
       return result.data.map((item) => item.name);
       // const issue: JIRA.Issue = await this.getIssue(key);
       // const {
