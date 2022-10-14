@@ -50,7 +50,7 @@ export async function run() {
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
     name: issueType,
-    color: "#FBCA04",
+    color: "FBCA04",
   });
 
   // TODO: add label to pull request (not overwriting existing ones)
