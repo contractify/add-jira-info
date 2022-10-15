@@ -1,10 +1,7 @@
 import * as core from "@actions/core";
-import * as github from "@actions/github";
 
-import * as common from "./common/common";
-import * as helpers from "./common/helpers";
-import * as extractor from "./extractor";
-import * as jira from "./jira";
+import { GithubClient } from "./common/github_client";
+import { JiraClient } from "./common/jira_client";
 
 export async function run() {
   const githubToken = core.getInput("github-token", { required: true });
@@ -13,58 +10,47 @@ export async function run() {
   const jiraToken = core.getInput("jira-token", { required: true });
   const jiraProjectKey = core.getInput("jira-project-key", { required: true });
 
-  console.log(JSON.stringify(github.context));
-  const branchName = (
-    github.context.payload.pull_request?.head.ref || github.context.ref
-  ).replace("refs/heads/", "");
-  core.info(`📄 Branch name: ${branchName}`);
+  const githubClient = new GithubClient(githubToken);
 
-  const jiraKey = extractor.jiraKey(branchName, jiraProjectKey);
+  const jiraClient = new JiraClient(
+    jiraBaseUrl,
+    jiraUsername,
+    jiraToken,
+    jiraProjectKey
+  );
+
+  const pullRequest = await githubClient.getPullRequest();
+  const branchName = githubClient.getBranchName();
+  const jiraKey = jiraClient.extractJiraKey(branchName);
+
   if (!jiraKey) {
-    core.info("No Jira key found in branch name, exiting");
+    core.warning("⚠️ No Jira key found in branch name, exiting");
     return;
   }
 
-  const client: common.ClientType = github.getOctokit(githubToken);
-  const prNumber = await helpers.getPrNumber(client);
-  if (!prNumber) {
-    console.log("Could not get pull request number from context, exiting");
+  if (!pullRequest || !pullRequest.number) {
+    core.warning("⚠️ Could not get pull request number, exiting");
     return;
   }
 
-  const jiraClient = new jira.Client(jiraBaseUrl, jiraUsername, jiraToken);
-
-  const formattedJiraKey = `${jiraProjectKey}-${jiraKey}`;
-
-  core.info(`📄 PR Number: ${jiraProjectKey}-${jiraKey}`);
-  core.info(`📄 Jira key: ${formattedJiraKey}`);
-
-  const issueType = await jiraClient.getIssueType(formattedJiraKey);
-  core.info(`📄 Issue type: ${issueType}`);
+  const issueType = await jiraClient.getIssueType(jiraKey);
   if (!issueType) {
-    console.log("Could not get issue type, exiting");
+    core.warning("⚠️ Could not get issue type, exiting");
     return;
   }
 
-  // TODO: create label if it doesn't exist
+  core.info(`📄 Branch name: ${branchName}`);
+  core.info(`📄 Pull Request: ${pullRequest.number} | ${pullRequest.title}`);
+  core.info(`📄 Jira key: ${jiraKey}`);
+  core.info(`📄 Issue type: ${issueType}`);
+
   core.info(`📄 Creating label: ${issueType}`);
-  await client.rest.issues.createLabel({
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
-    name: issueType,
-    color: "FBCA04",
-  });
+  await githubClient.createLabelIfNotExists(issueType, "Jira Issue Type");
 
-  // TODO: add label to pull request (not overwriting existing ones)
-  core.info(`📄 Adding label: ${issueType} to: ${prNumber}`);
-  await client.rest.issues.addLabels({
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
-    issue_number: prNumber,
-    labels: [issueType],
-  });
+  core.info(`📄 Adding label: ${issueType} to: ${pullRequest.number}`);
+  await githubClient.addLabelsToIssue(pullRequest.number, [issueType]);
 
-  core.info(`📄 Finished for ${prNumber}`);
+  core.info(`📄 Finished for ${pullRequest.number}`);
 }
 
 run();

@@ -1,7 +1,7 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 6401:
+/***/ 6960:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -39,121 +39,106 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getPrReviewersAndAssignees = exports.getChangedFiles = exports.getPrNumber = exports.fetchContent = void 0;
+exports.GithubClient = void 0;
 const github = __importStar(__nccwpck_require__(5438));
 const core = __importStar(__nccwpck_require__(2186));
-function fetchContent(client, repoPath) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const response = yield client.rest.repos.getContent({
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
-            path: repoPath,
-            ref: github.context.sha,
-        });
-        return Buffer.from(response.data.content, response.data.encoding).toString();
-    });
-}
-exports.fetchContent = fetchContent;
-function getPrNumber(client) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const pullRequest = github.context.payload.pull_request;
-            if (pullRequest) {
-                return pullRequest.number;
+class GithubClient {
+    constructor(token) {
+        this.token = token;
+        this.client = github.getOctokit(this.token);
+        this.owner = github.context.repo.owner;
+        this.repo = github.context.repo.repo;
+    }
+    getBranchName() {
+        var _a;
+        return (((_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.head.ref) || github.context.ref).replace("refs/heads/", "");
+    }
+    getPullRequest() {
+        var _a, _b;
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                if ((_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number) {
+                    return this.getPullRequestByNumber((_b = github.context.payload.pull_request) === null || _b === void 0 ? void 0 : _b.number);
+                }
+                return this.getPullRequestAssociatedWithCommit(github.context.sha);
             }
-            const result = yield client.rest.repos.listPullRequestsAssociatedWithCommit({
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo,
-                commit_sha: github.context.sha,
+            catch (error) {
+                core.error(`🚨 Failed to get pull request: ${error}`);
+                return undefined;
+            }
+        });
+    }
+    createLabelIfNotExists(label, description = "", color = "FBCA04") {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield this.client.rest.issues.createLabel({
+                    owner: this.owner,
+                    repo: this.repo,
+                    name: label,
+                    description: description,
+                    color: color,
+                });
+            }
+            catch (error) {
+                core.error(`🚨 Failed to create label: ${error}`);
+                throw error;
+            }
+        });
+    }
+    addLabelsToIssue(issue, labels) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield this.client.rest.issues.addLabels({
+                    owner: this.owner,
+                    repo: this.repo,
+                    issue_number: issue,
+                    labels: labels,
+                });
+            }
+            catch (error) {
+                core.error(`🚨 Failed to add labels to issue: ${error}`);
+                throw error;
+            }
+        });
+    }
+    getPullRequestByNumber(number) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const response = yield this.client.rest.pulls.get({
+                owner: this.owner,
+                repo: this.repo,
+                pull_number: number,
             });
-            const pr = result.data
+            return {
+                number: response.data.number,
+                title: response.data.title,
+            };
+        });
+    }
+    getPullRequestAssociatedWithCommit(sha) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const response = yield this.client.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner: this.owner,
+                repo: this.repo,
+                commit_sha: sha,
+            });
+            const pullRequest = response.data
                 .filter((el) => el.state === "open")
                 .find((el) => {
                 return github.context.payload.ref === `refs/heads/${el.head.ref}`;
             });
-            if (pr !== undefined) {
-                core.info(`📄 Linked PR: ${pr.number} | ${pr.title}`);
-            }
-            return pr === null || pr === void 0 ? void 0 : pr.number;
-        }
-        catch (error) {
-            core.error(`🚨 Failed to get PR number: ${error}`);
-            return undefined;
-        }
-    });
-}
-exports.getPrNumber = getPrNumber;
-function getChangedFiles(client, prNumber) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const listFilesOptions = client.rest.pulls.listFiles.endpoint.merge({
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
-            pull_number: prNumber,
-            per_page: 100,
-        });
-        const listFilesResponse = yield client.paginate(listFilesOptions);
-        const changedFiles = listFilesResponse.map((f) => f.filename);
-        // TODO: loop when more than 30 files changed
-        if (changedFiles.length > 0) {
-            core.info("📄 Changed files");
-            for (const file of changedFiles) {
-                core.info(`  📄 Changed file: ${file}`);
-            }
-        }
-        return changedFiles;
-    });
-}
-exports.getChangedFiles = getChangedFiles;
-function getPrReviewersAndAssignees(client, prNumber) {
-    var _a, _b;
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const pullRequest = yield client.rest.pulls.get({
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo,
-                pull_number: prNumber,
-            });
-            const labels = pullRequest.data.labels;
-            const reviewers = pullRequest.data.requested_reviewers;
             return {
-                prNumber: prNumber,
-                labels: labels.map((label) => label.name),
-                reviewers: reviewers.map((reviewer) => reviewer.login),
-                baseSha: (_a = pullRequest.data.base) === null || _a === void 0 ? void 0 : _a.sha,
-                owner: (_b = pullRequest.data.user) === null || _b === void 0 ? void 0 : _b.login,
+                number: pullRequest === null || pullRequest === void 0 ? void 0 : pullRequest.number,
+                title: pullRequest === null || pullRequest === void 0 ? void 0 : pullRequest.title,
             };
-        }
-        catch (error) {
-            core.error(`🚨 Failed to get PR details: ${error}`);
-            return undefined;
-        }
-    });
+        });
+    }
 }
-exports.getPrReviewersAndAssignees = getPrReviewersAndAssignees;
+exports.GithubClient = GithubClient;
 
 
 /***/ }),
 
-/***/ 9609:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.jiraKey = void 0;
-function jiraKey(input, jiraProjectKey) {
-    var _a;
-    const pattern = `${jiraProjectKey}-(?<number>\\d+)`;
-    const regex = new RegExp(pattern, "i");
-    const match = input.match(regex);
-    return (_a = match === null || match === void 0 ? void 0 : match.groups) === null || _a === void 0 ? void 0 : _a.number;
-}
-exports.jiraKey = jiraKey;
-
-
-/***/ }),
-
-/***/ 4438:
+/***/ 8208:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -171,13 +156,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Client = void 0;
+exports.JiraClient = exports.JiraKey = void 0;
 const axios_1 = __importDefault(__nccwpck_require__(8757));
-class Client {
-    constructor(baseUrl, username, token) {
+class JiraKey {
+    constructor(projectKey, number) {
+        this.projectKey = projectKey;
+        this.number = number;
+    }
+    toString() {
+        return `${this.projectKey}-${this.number}`;
+    }
+}
+exports.JiraKey = JiraKey;
+class JiraClient {
+    constructor(baseUrl, username, token, projectKey) {
         this.baseUrl = baseUrl;
         this.username = username;
         this.token = token;
+        this.projectKey = projectKey;
         const encodedToken = Buffer.from(`${this.username}:${this.token}`).toString("base64");
         this.client = axios_1.default.create({
             baseURL: `${this.baseUrl}/rest/api/3`,
@@ -185,11 +181,20 @@ class Client {
             headers: { Authorization: `Basic ${encodedToken}` },
         });
     }
-    getIssueType(id) {
+    extractJiraKey(input) {
+        var _a, _b;
+        const regex = new RegExp(`${this.projectKey}-(?<number>\\d+)`, "i");
+        const match = input.match(regex);
+        if (!((_a = match === null || match === void 0 ? void 0 : match.groups) === null || _a === void 0 ? void 0 : _a.number)) {
+            return undefined;
+        }
+        return new JiraKey(this.projectKey, (_b = match === null || match === void 0 ? void 0 : match.groups) === null || _b === void 0 ? void 0 : _b.number);
+    }
+    getIssueType(key) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const response = yield this.client.get(`/issue/${id}?fields=issuetype`);
+                const response = yield this.client.get(`/issue/${key}?fields=issuetype`);
                 return (_a = response.data.fields.issuetype.name) === null || _a === void 0 ? void 0 : _a.toLowerCase();
             }
             catch (error) {
@@ -201,7 +206,7 @@ class Client {
         });
     }
 }
-exports.Client = Client;
+exports.JiraClient = JiraClient;
 
 
 /***/ }),
@@ -246,59 +251,42 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const github = __importStar(__nccwpck_require__(5438));
-const helpers = __importStar(__nccwpck_require__(6401));
-const extractor = __importStar(__nccwpck_require__(9609));
-const jira = __importStar(__nccwpck_require__(4438));
+const github_client_1 = __nccwpck_require__(6960);
+const jira_client_1 = __nccwpck_require__(8208);
 function run() {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const githubToken = core.getInput("github-token", { required: true });
         const jiraBaseUrl = core.getInput("jira-base-url", { required: true });
         const jiraUsername = core.getInput("jira-username", { required: true });
         const jiraToken = core.getInput("jira-token", { required: true });
         const jiraProjectKey = core.getInput("jira-project-key", { required: true });
-        console.log(JSON.stringify(github.context));
-        const branchName = (((_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.head.ref) || github.context.ref).replace("refs/heads/", "");
-        core.info(`📄 Branch name: ${branchName}`);
-        const jiraKey = extractor.jiraKey(branchName, jiraProjectKey);
+        const githubClient = new github_client_1.GithubClient(githubToken);
+        const jiraClient = new jira_client_1.JiraClient(jiraBaseUrl, jiraUsername, jiraToken, jiraProjectKey);
+        const pullRequest = yield githubClient.getPullRequest();
+        const branchName = githubClient.getBranchName();
+        const jiraKey = jiraClient.extractJiraKey(branchName);
         if (!jiraKey) {
-            core.info("No Jira key found in branch name, exiting");
+            core.warning("⚠️ No Jira key found in branch name, exiting");
             return;
         }
-        const client = github.getOctokit(githubToken);
-        const prNumber = yield helpers.getPrNumber(client);
-        if (!prNumber) {
-            console.log("Could not get pull request number from context, exiting");
+        if (!pullRequest || !pullRequest.number) {
+            core.warning("⚠️ Could not get pull request number, exiting");
             return;
         }
-        const jiraClient = new jira.Client(jiraBaseUrl, jiraUsername, jiraToken);
-        const formattedJiraKey = `${jiraProjectKey}-${jiraKey}`;
-        core.info(`📄 PR Number: ${jiraProjectKey}-${jiraKey}`);
-        core.info(`📄 Jira key: ${formattedJiraKey}`);
-        const issueType = yield jiraClient.getIssueType(formattedJiraKey);
-        core.info(`📄 Issue type: ${issueType}`);
+        const issueType = yield jiraClient.getIssueType(jiraKey);
         if (!issueType) {
-            console.log("Could not get issue type, exiting");
+            core.warning("⚠️ Could not get issue type, exiting");
             return;
         }
-        // TODO: create label if it doesn't exist
+        core.info(`📄 Branch name: ${branchName}`);
+        core.info(`📄 Pull Request: ${pullRequest.number} | ${pullRequest.title}`);
+        core.info(`📄 Jira key: ${jiraKey}`);
+        core.info(`📄 Issue type: ${issueType}`);
         core.info(`📄 Creating label: ${issueType}`);
-        yield client.rest.issues.createLabel({
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
-            name: issueType,
-            color: "FBCA04",
-        });
-        // TODO: add label to pull request (not overwriting existing ones)
-        core.info(`📄 Adding label: ${issueType} to: ${prNumber}`);
-        yield client.rest.issues.addLabels({
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
-            issue_number: prNumber,
-            labels: [issueType],
-        });
-        core.info(`📄 Finished for ${prNumber}`);
+        yield githubClient.createLabelIfNotExists(issueType, "Jira Issue Type");
+        core.info(`📄 Adding label: ${issueType} to: ${pullRequest.number}`);
+        yield githubClient.addLabelsToIssue(pullRequest.number, [issueType]);
+        core.info(`📄 Finished for ${pullRequest.number}`);
     });
 }
 exports.run = run;
