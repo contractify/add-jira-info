@@ -69,8 +69,12 @@ class GithubClient {
         });
     }
     createLabelIfNotExists(label, description = "", color = "FBCA04") {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                if (yield this.labelExists(label)) {
+                    return;
+                }
                 yield this.client.rest.issues.createLabel({
                     owner: this.owner,
                     repo: this.repo,
@@ -80,14 +84,30 @@ class GithubClient {
                 });
             }
             catch (error) {
-                if (error.response) {
-                    if (error.response.code === "already_exists") {
-                        return;
-                    }
-                    throw new Error(JSON.stringify(error.response));
+                if (((_a = error.response) === null || _a === void 0 ? void 0 : _a.code) === "already_exists") {
+                    return;
                 }
-                throw error;
+                this.throwError(error);
             }
+        });
+    }
+    labelExists(label) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield this.client.rest.issues.getLabel({
+                    owner: this.owner,
+                    repo: this.repo,
+                    name: label,
+                });
+            }
+            catch (error) {
+                if (((_a = error.response) === null || _a === void 0 ? void 0 : _a.status) === 404) {
+                    return false;
+                }
+                this.throwError(error);
+            }
+            return true;
         });
     }
     addLabelsToIssue(issue, labels) {
@@ -107,35 +127,62 @@ class GithubClient {
         });
     }
     getPullRequestByNumber(number) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            const response = yield this.client.rest.pulls.get({
-                owner: this.owner,
-                repo: this.repo,
-                pull_number: number,
-            });
-            return {
-                number: response.data.number,
-                title: response.data.title,
-            };
+            try {
+                const response = yield this.client.rest.pulls.get({
+                    owner: this.owner,
+                    repo: this.repo,
+                    pull_number: number,
+                });
+                return {
+                    number: response.data.number,
+                    title: response.data.title,
+                };
+            }
+            catch (error) {
+                if (((_a = error.response) === null || _a === void 0 ? void 0 : _a.status) === 404) {
+                    return undefined;
+                }
+                this.throwError(error);
+            }
         });
     }
     getPullRequestAssociatedWithCommit(sha) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            const response = yield this.client.rest.repos.listPullRequestsAssociatedWithCommit({
-                owner: this.owner,
-                repo: this.repo,
-                commit_sha: sha,
-            });
-            const pullRequest = response.data
-                .filter((el) => el.state === "open")
-                .find((el) => {
-                return github.context.payload.ref === `refs/heads/${el.head.ref}`;
-            });
-            return {
-                number: pullRequest === null || pullRequest === void 0 ? void 0 : pullRequest.number,
-                title: pullRequest === null || pullRequest === void 0 ? void 0 : pullRequest.title,
-            };
+            try {
+                const response = yield this.client.rest.repos.listPullRequestsAssociatedWithCommit({
+                    owner: this.owner,
+                    repo: this.repo,
+                    commit_sha: sha,
+                });
+                const pullRequest = response.data
+                    .filter((el) => el.state === "open")
+                    .find((el) => {
+                    return github.context.payload.ref === `refs/heads/${el.head.ref}`;
+                });
+                if (!pullRequest) {
+                    return undefined;
+                }
+                return {
+                    number: pullRequest.number,
+                    title: pullRequest.title,
+                };
+            }
+            catch (error) {
+                if (((_a = error.response) === null || _a === void 0 ? void 0 : _a.status) === 404) {
+                    return undefined;
+                }
+                this.throwError(error);
+            }
         });
+    }
+    throwError(error) {
+        if (error.response) {
+            throw new Error(JSON.stringify(error.response));
+        }
+        throw error;
     }
 }
 exports.GithubClient = GithubClient;
@@ -274,7 +321,7 @@ function run() {
             core.warning("⚠️ No Jira key found in branch name, exiting");
             return;
         }
-        if (!pullRequest || !pullRequest.number) {
+        if (!pullRequest) {
             core.warning("⚠️ Could not get pull request number, exiting");
             return;
         }

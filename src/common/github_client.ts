@@ -4,8 +4,8 @@ import * as core from "@actions/core";
 export type GithubClientType = ReturnType<typeof github.getOctokit>;
 
 type GithubPullRequest = {
-  number: number | undefined;
-  title: string | undefined;
+  number: number;
+  title: string;
 };
 
 export class GithubClient {
@@ -45,6 +45,10 @@ export class GithubClient {
     color: string = "FBCA04"
   ): Promise<void> {
     try {
+      if (await this.labelExists(label)) {
+        return;
+      }
+
       await this.client.rest.issues.createLabel({
         owner: this.owner,
         repo: this.repo,
@@ -53,14 +57,27 @@ export class GithubClient {
         color: color,
       });
     } catch (error: any) {
-      if (error.response) {
-        if (error.response.code === "already_exists") {
-          return;
-        }
-        throw new Error(JSON.stringify(error.response));
+      if (error.response?.code === "already_exists") {
+        return;
       }
-      throw error;
+      this.throwError(error);
     }
+  }
+
+  private async labelExists(label: string): Promise<boolean> {
+    try {
+      await this.client.rest.issues.getLabel({
+        owner: this.owner,
+        repo: this.repo,
+        name: label,
+      });
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return false;
+      }
+      this.throwError(error);
+    }
+    return true;
   }
 
   async addLabelsToIssue(issue: number, labels: string[]): Promise<void> {
@@ -80,38 +97,63 @@ export class GithubClient {
   private async getPullRequestByNumber(
     number: number
   ): Promise<GithubPullRequest | undefined> {
-    const response = await this.client.rest.pulls.get({
-      owner: this.owner,
-      repo: this.repo,
-      pull_number: number,
-    });
+    try {
+      const response = await this.client.rest.pulls.get({
+        owner: this.owner,
+        repo: this.repo,
+        pull_number: number,
+      });
 
-    return {
-      number: response.data.number,
-      title: response.data.title,
-    };
+      return {
+        number: response.data.number,
+        title: response.data.title,
+      };
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return undefined;
+      }
+      this.throwError(error);
+    }
   }
 
   private async getPullRequestAssociatedWithCommit(
     sha: string
-  ): Promise<GithubPullRequest> {
-    const response =
-      await this.client.rest.repos.listPullRequestsAssociatedWithCommit({
-        owner: this.owner,
-        repo: this.repo,
-        commit_sha: sha,
-      });
+  ): Promise<GithubPullRequest | undefined> {
+    try {
+      const response =
+        await this.client.rest.repos.listPullRequestsAssociatedWithCommit({
+          owner: this.owner,
+          repo: this.repo,
+          commit_sha: sha,
+        });
 
-    const pullRequest = response.data
-      .filter((el) => el.state === "open")
-      .find((el) => {
-        return github.context.payload.ref === `refs/heads/${el.head.ref}`;
-      });
+      const pullRequest = response.data
+        .filter((el) => el.state === "open")
+        .find((el) => {
+          return github.context.payload.ref === `refs/heads/${el.head.ref}`;
+        });
 
-    return {
-      number: pullRequest?.number,
-      title: pullRequest?.title,
-    };
+      if (!pullRequest) {
+        return undefined;
+      }
+
+      return {
+        number: pullRequest.number,
+        title: pullRequest.title,
+      };
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return undefined;
+      }
+      this.throwError(error);
+    }
+  }
+
+  private throwError(error: any) {
+    if (error.response) {
+      throw new Error(JSON.stringify(error.response));
+    }
+    throw error;
   }
 
   // private async fetchContent(repoPath: string): Promise<string> {

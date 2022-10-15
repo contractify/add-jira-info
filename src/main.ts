@@ -28,7 +28,7 @@ export async function run() {
     return;
   }
 
-  if (!pullRequest || !pullRequest.number) {
+  if (!pullRequest) {
     core.warning("⚠️ Could not get pull request number, exiting");
     return;
   }
