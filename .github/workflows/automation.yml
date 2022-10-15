@@ -28,8 +28,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Add Jira issue type as label
-      # uses: contractify/add-jira-info@b1e556634bbd74509a3059a2f54ba66b95cbf9e2
-      uses: ../
+      uses: contractify/add-jira-info@CTR-3738_initial-version
+      # uses: ../
       if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
