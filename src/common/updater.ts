@@ -1,4 +1,4 @@
-import { JiraKey, JiraIssue } from "./jira_client";
+import { JiraIssue } from "./jira_client";
 
 export class Updater {
   constructor(private jiraIssue: JiraIssue) {}
