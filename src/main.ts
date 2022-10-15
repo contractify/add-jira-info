@@ -13,6 +13,7 @@ export async function run() {
   const jiraToken = core.getInput("jira-token", { required: true });
   const jiraProjectKey = core.getInput("jira-project-key", { required: true });
 
+  console.log(JSON.stringify(github.context));
   const branchName = github.context.ref.replace("refs/heads/", "");
   core.info(`📄 Branch name: ${branchName}`);
 
