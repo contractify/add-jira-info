@@ -25,7 +25,7 @@ describe("get jira issue type", () => {
     };
 
     nock("https://base-url")
-      .get("/issue/PRJ-123?fields=issuetype")
+      .get("/rest/api/3/issue/PRJ-123?fields=issuetype")
       .reply(200, () => response);
 
     const issueType = await client.getIssueType(new JiraKey("PRJ", "123"));

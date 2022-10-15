@@ -39,10 +39,9 @@ export class JiraClient {
   async getIssueType(key: JiraKey): Promise<string | undefined> {
     try {
       const res = await this.client.get(
-        `${this.baseUrl}/issue/${key}?fields=issuetype`
+        this.getRestApiUrl(`issue/${key}?fields=issuetype`)
       );
       const body: string = await res.readBody();
-      console.log(body);
       const obj = JSON.parse(body);
       return obj.fields.issuetype.name?.toLowerCase();
     } catch (error: any) {
@@ -51,5 +50,9 @@ export class JiraClient {
       }
       throw error;
     }
+  }
+
+  private getRestApiUrl(endpoint: string): string {
+    return `${this.baseUrl}/rest/api/3/${endpoint}`;
   }
 }
