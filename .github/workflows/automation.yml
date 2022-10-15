@@ -18,10 +18,6 @@ permissions:
   checks: write
   pull-requests: write
 
-env:
-  JIRA_USERNAME: ${{ secrets.JIRA_USERNAME }}
-  JIRA_ACCESS_TOKEN: ${{ secrets.JIRA_ACCESS_TOKEN }}
-
 jobs:
   prechecks:
     name: prechecks

@@ -143,7 +143,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.jiraKey = void 0;
 function jiraKey(input, jiraProjectKey) {
     var _a;
-    const pattern = `^${jiraProjectKey}-(?<number>\\d+)`;
+    const pattern = `${jiraProjectKey}-(?<number>\\d+)`;
     const regex = new RegExp(pattern, "i");
     const match = input.match(regex);
     return (_a = match === null || match === void 0 ? void 0 : match.groups) === null || _a === void 0 ? void 0 : _a.number;
@@ -174,65 +174,17 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Client = void 0;
 const axios_1 = __importDefault(__nccwpck_require__(8757));
 class Client {
-    constructor(jiraToken, jiraBaseUrl) {
-        this.jiraToken = jiraToken;
-        this.jiraBaseUrl = jiraBaseUrl;
-        const encodedToken = Buffer.from(this.jiraToken).toString("base64");
+    constructor(baseUrl, username, token) {
+        this.baseUrl = baseUrl;
+        this.username = username;
+        this.token = token;
+        const encodedToken = Buffer.from(`${this.username}:${this.token}`).toString("base64");
         this.client = axios_1.default.create({
-            baseURL: `${this.jiraBaseUrl}/rest/api/3`,
+            baseURL: `${this.baseUrl}/rest/api/3`,
             timeout: 2000,
             headers: { Authorization: `Basic ${encodedToken}` },
         });
     }
-    // async getProjectId(projectKey: string): Promise<number | undefined> {
-    //   try {
-    //     const result = await this.client.get(`/project/${projectKey}`);
-    //     return result.data.id;
-    //   } catch (error: any) {
-    //     if (error.response) {
-    //       throw new Error(JSON.stringify(error.response, null, 4));
-    //     }
-    //     throw error;
-    //   }
-    // }
-    // async getIssueTypesForProject(projectKey: string): Promise<string[]> {
-    //   try {
-    //     const projectId = await this.getProjectId(projectKey);
-    //     const response = await this.client.get(
-    //       `/issuetype/project?projectId=${projectId}`
-    //     );
-    //     return [
-    //       ...new Set<string>(
-    //         response.data
-    //           .filter((item) => item.level !== 1)
-    //           .map((item) => item.name)
-    //       ),
-    //     ];
-    //     // const issue: JIRA.Issue = await this.getIssue(key);
-    //     // const {
-    //     //   fields: { issuetype: type, project, summary },
-    //     // } = issue;
-    //     // return {
-    //     //   key,
-    //     //   summary,
-    //     //   url: `${this.jiraBaseUrl}/browse/${key}`,
-    //     //   type: {
-    //     //     name: type.name,
-    //     //     icon: type.iconUrl,
-    //     //   },
-    //     //   project: {
-    //     //     name: project.name,
-    //     //     url: `${this.jiraBaseUrl}/browse/${project.key}`,
-    //     //     key: project.key,
-    //     //   },
-    //     // };
-    //   } catch (error: any) {
-    //     if (error.response) {
-    //       throw new Error(JSON.stringify(error.response, null, 4));
-    //     }
-    //     throw error;
-    //   }
-    // }
     getIssueType(id) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
@@ -300,10 +252,11 @@ const extractor = __importStar(__nccwpck_require__(9609));
 const jira = __importStar(__nccwpck_require__(4438));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        const token = core.getInput("token", { required: true });
-        const jiraProjectKey = core.getInput("jira-project-key", { required: true });
-        const jiraToken = core.getInput("jira-token", { required: true });
+        const githubToken = core.getInput("github-token", { required: true });
         const jiraBaseUrl = core.getInput("jira-base-url", { required: true });
+        const jiraUsername = core.getInput("jira-username", { required: true });
+        const jiraToken = core.getInput("jira-token", { required: true });
+        const jiraProjectKey = core.getInput("jira-project-key", { required: true });
         const branchName = github.context.ref.replace("refs/heads/", "");
         core.info(`📄 Branch name: ${branchName}`);
         const jiraKey = extractor.jiraKey(branchName, jiraProjectKey);
@@ -311,15 +264,13 @@ function run() {
             core.info("No Jira key found in branch name, exiting");
             return;
         }
-        const client = github.getOctokit(token);
+        const client = github.getOctokit(githubToken);
         const prNumber = yield helpers.getPrNumber(client);
         if (!prNumber) {
             console.log("Could not get pull request number from context, exiting");
             return;
         }
-        const jiraClient = new jira.Client(jiraToken, jiraBaseUrl);
-        // const issueTypes = await jiraClient.getIssueTypesForProject(jiraProjectKey);
-        // core.info(`Issue Types: ${issueTypes.join(", ")}`);
+        const jiraClient = new jira.Client(jiraBaseUrl, jiraUsername, jiraToken);
         const formattedJiraKey = `${jiraProjectKey}-${jiraKey}`;
         core.info(`📄 PR Number: ${jiraProjectKey}-${jiraKey}`);
         core.info(`📄 Jira key: ${formattedJiraKey}`);
