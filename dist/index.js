@@ -314,6 +314,8 @@ function run() {
         const jiraToken = core.getInput("jira-token", { required: true });
         const jiraProjectKey = core.getInput("jira-project-key", { required: true });
         const addLabelWithIssueType = core.getBooleanInput("add-label-with-issue-type");
+        const issueTypeLabelColor = core.getInput("issue-type-label-color") || "FBCA04";
+        const issueTypeLabelDescription = core.getInput("issue-type-label-description") || "Jira Issue Type";
         const githubClient = new github_client_1.GithubClient(githubToken);
         const jiraClient = new jira_client_1.JiraClient(jiraBaseUrl, jiraUsername, jiraToken, jiraProjectKey);
         const pullRequest = yield githubClient.getPullRequest();
@@ -341,7 +343,7 @@ function run() {
             core.info(`📄 Adding pull request label`);
             if (!(yield githubClient.labelExists(issueType))) {
                 core.info(`    Creating label: ${issueType}`);
-                yield githubClient.createLabel(issueType, "Jira Issue Type");
+                yield githubClient.createLabel(issueType, issueTypeLabelDescription, issueTypeLabelColor);
             }
             core.info(`    Adding label: ${issueType} to: ${pullRequest}`);
             yield githubClient.addLabelsToIssue(pullRequest, [issueType]);

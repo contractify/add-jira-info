@@ -13,6 +13,10 @@ export async function run() {
   const addLabelWithIssueType = core.getBooleanInput(
     "add-label-with-issue-type"
   );
+  const issueTypeLabelColor =
+    core.getInput("issue-type-label-color") || "FBCA04";
+  const issueTypeLabelDescription =
+    core.getInput("issue-type-label-description") || "Jira Issue Type";
 
   const githubClient = new GithubClient(githubToken);
 
@@ -54,7 +58,11 @@ export async function run() {
 
     if (!(await githubClient.labelExists(issueType))) {
       core.info(`    Creating label: ${issueType}`);
-      await githubClient.createLabel(issueType, "Jira Issue Type");
+      await githubClient.createLabel(
+        issueType,
+        issueTypeLabelDescription,
+        issueTypeLabelColor
+      );
     }
 
     core.info(`    Adding label: ${issueType} to: ${pullRequest}`);
