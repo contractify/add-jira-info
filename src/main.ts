@@ -7,10 +7,11 @@ import * as extractor from "./extractor";
 import * as jira from "./jira";
 
 export async function run() {
-  const token = core.getInput("token", { required: true });
-  const jiraProjectKey = core.getInput("jira-project-key", { required: true });
-  const jiraToken = core.getInput("jira-token", { required: true });
+  const githubToken = core.getInput("github-token", { required: true });
   const jiraBaseUrl = core.getInput("jira-base-url", { required: true });
+  const jiraUsername = core.getInput("jira-username", { required: true });
+  const jiraToken = core.getInput("jira-token", { required: true });
+  const jiraProjectKey = core.getInput("jira-project-key", { required: true });
 
   const branchName = github.context.ref.replace("refs/heads/", "");
   core.info(`📄 Branch name: ${branchName}`);
@@ -21,16 +22,14 @@ export async function run() {
     return;
   }
 
-  const client: common.ClientType = github.getOctokit(token);
+  const client: common.ClientType = github.getOctokit(githubToken);
   const prNumber = await helpers.getPrNumber(client);
   if (!prNumber) {
     console.log("Could not get pull request number from context, exiting");
     return;
   }
 
-  const jiraClient = new jira.Client(jiraToken, jiraBaseUrl);
-  // const issueTypes = await jiraClient.getIssueTypesForProject(jiraProjectKey);
-  // core.info(`Issue Types: ${issueTypes.join(", ")}`);
+  const jiraClient = new jira.Client(jiraBaseUrl, jiraUsername, jiraToken);
 
   const formattedJiraKey = `${jiraProjectKey}-${jiraKey}`;
 

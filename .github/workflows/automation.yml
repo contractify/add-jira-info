@@ -1,0 +1,39 @@
+name: Automation
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    types:
+      - opened
+      - ready_for_review
+      - reopened
+      - synchronize
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  checks: write
+  pull-requests: write
+
+env:
+  JIRA_USERNAME: ${{ secrets.JIRA_USERNAME }}
+  JIRA_ACCESS_TOKEN: ${{ secrets.JIRA_ACCESS_TOKEN }}
+
+jobs:
+  prechecks:
+    name: prechecks
+    runs-on: ubuntu-latest
+    steps:
+    - name: Add Jira issue type as label
+      # uses: contractify/add-jira-info@b1e556634bbd74509a3059a2f54ba66b95cbf9e2
+      uses: ./
+      if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        jira-base-url: ${{ secrets.JIRA_BASE_URL }}
+        jira-username: ${{ secrets.JIRA_USERNAME }}
+        jira-token: ${{ secrets.JIRA_TOKEN }}
+        jira-project-key: ${{ secrets.JIRA_PROJECT_KEY }}

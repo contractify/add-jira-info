@@ -1,7 +1,7 @@
 {
-  "name": "jira-issue-types-to-labels",
+  "name": "add-jira-info",
   "version": "1.0.0",
-  "description": "Creates labels based on the Jira issue types",
+  "description": "Automatically add Jira info to a pull request.",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc && ncc build lib/main.js",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/contractify/jira-issue-types-to-labels.git"
+    "url": "git+https://github.com/contractify/add-jira-info.git"
   },
   "keywords": [
     "github",
@@ -19,7 +19,7 @@
     "jira",
     "labels"
   ],
-  "author": "GitHub",
+  "author": "Contractify",
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.10.0",
