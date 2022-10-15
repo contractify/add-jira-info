@@ -43,9 +43,10 @@ exports.GithubClient = void 0;
 const github = __importStar(__nccwpck_require__(5438));
 const core = __importStar(__nccwpck_require__(2186));
 class GithubPullRequest {
-    constructor(number, title) {
+    constructor(number, title, body) {
         this.number = number;
         this.title = title;
+        this.body = body;
     }
     toString() {
         return `${this.number} | ${this.title}`;
@@ -132,8 +133,19 @@ class GithubClient {
             }
         });
     }
+    updatePullRequest(pullRequest) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.client.rest.pulls.update({
+                owner: this.owner,
+                repo: this.repo,
+                pull_number: pullRequest.number,
+                title: pullRequest.title,
+                body: pullRequest.body,
+            });
+        });
+    }
     getPullRequestByNumber(number) {
-        var _a;
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const response = yield this.client.rest.pulls.get({
@@ -141,10 +153,10 @@ class GithubClient {
                     repo: this.repo,
                     pull_number: number,
                 });
-                return new GithubPullRequest(response.data.number, response.data.title);
+                return new GithubPullRequest(response.data.number, response.data.title.trim(), (_a = response.data.body) === null || _a === void 0 ? void 0 : _a.trim());
             }
             catch (error) {
-                if (((_a = error.response) === null || _a === void 0 ? void 0 : _a.status) === 404) {
+                if (((_b = error.response) === null || _b === void 0 ? void 0 : _b.status) === 404) {
                     return undefined;
                 }
                 this.throwError(error);
@@ -152,7 +164,7 @@ class GithubClient {
         });
     }
     getPullRequestAssociatedWithCommit(sha) {
-        var _a;
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const response = yield this.client.rest.repos.listPullRequestsAssociatedWithCommit({
@@ -168,10 +180,10 @@ class GithubClient {
                 if (!pullRequest) {
                     return undefined;
                 }
-                return new GithubPullRequest(pullRequest.number, pullRequest.title);
+                return new GithubPullRequest(pullRequest.number, pullRequest.title.trim(), (_a = pullRequest.body) === null || _a === void 0 ? void 0 : _a.trim());
             }
             catch (error) {
-                if (((_a = error.response) === null || _a === void 0 ? void 0 : _a.status) === 404) {
+                if (((_b = error.response) === null || _b === void 0 ? void 0 : _b.status) === 404) {
                     return undefined;
                 }
                 this.throwError(error);
@@ -205,19 +217,30 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.JiraClient = exports.JiraKey = void 0;
+exports.JiraClient = exports.JiraIssue = exports.JiraKey = void 0;
 const http_client_1 = __nccwpck_require__(6255);
 const auth_1 = __nccwpck_require__(5526);
 class JiraKey {
-    constructor(projectKey, number) {
-        this.projectKey = projectKey;
+    constructor(project, number) {
+        this.project = project;
         this.number = number;
     }
     toString() {
-        return `${this.projectKey}-${this.number}`;
+        return `${this.project}-${this.number}`;
     }
 }
 exports.JiraKey = JiraKey;
+class JiraIssue {
+    constructor(key, title, type) {
+        this.key = key;
+        this.title = title;
+        this.type = type;
+    }
+    toString() {
+        return `${this.key} | ${this.type} | ${this.title}`;
+    }
+}
+exports.JiraIssue = JiraIssue;
 class JiraClient {
     constructor(baseUrl, username, token, projectKey) {
         this.baseUrl = baseUrl;
@@ -238,14 +261,24 @@ class JiraClient {
         }
         return new JiraKey(this.projectKey, (_b = match === null || match === void 0 ? void 0 : match.groups) === null || _b === void 0 ? void 0 : _b.number);
     }
-    getIssueType(key) {
+    getIssue(key) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const res = yield this.client.get(this.getRestApiUrl(`issue/${key}?fields=issuetype`));
+                const res = yield this.client.get(this.getRestApiUrl(`issue/${key}?fields=issuetype,summary`));
                 const body = yield res.readBody();
                 const obj = JSON.parse(body);
-                return (_a = obj.fields.issuetype.name) === null || _a === void 0 ? void 0 : _a.toLowerCase();
+                var issuetype = undefined;
+                var title = undefined;
+                for (let key in obj.fields) {
+                    if (key === "issuetype") {
+                        issuetype = (_a = obj.fields[key].name) === null || _a === void 0 ? void 0 : _a.toLowerCase();
+                    }
+                    if (key === "summary") {
+                        title = obj.fields[key];
+                    }
+                }
+                return new JiraIssue(key, title, issuetype);
             }
             catch (error) {
                 if (error.response) {
@@ -260,6 +293,58 @@ class JiraClient {
     }
 }
 exports.JiraClient = JiraClient;
+
+
+/***/ }),
+
+/***/ 3235:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Updater = void 0;
+class Updater {
+    constructor(jiraIssue) {
+        this.jiraIssue = jiraIssue;
+    }
+    title(title) {
+        if (title.startsWith(`${this.jiraIssue.key} | `)) {
+            return title;
+        }
+        const patternsToStrip = [
+            `^${this.jiraIssue.key.project} ${this.jiraIssue.key.number}`,
+            `^${this.jiraIssue.key.project}-${this.jiraIssue.key.number}`,
+            `${this.jiraIssue.key}$`,
+        ];
+        for (const pattern of patternsToStrip) {
+            const regex = new RegExp(`${pattern}`, "i");
+            title = title.replace(regex, "").trim();
+            title = title.replace(/^\|+/, "").trim();
+            title = title.replace(/\|+$/, "").trim();
+        }
+        return `${this.jiraIssue.key} | ${title}`;
+    }
+    body(body) {
+        if (body === null || body === void 0 ? void 0 : body.includes(`${this.jiraIssue.key}`)) {
+            return body;
+        }
+        if (!body) {
+            body = "";
+        }
+        const patternsToStrip = [
+            `References ${this.jiraIssue.key.project}-$`,
+            `${this.jiraIssue.key.project}-$`,
+            `${this.jiraIssue.key}$`,
+        ];
+        for (const pattern of patternsToStrip) {
+            const regex = new RegExp(`${pattern}`, "i");
+            body = body.replace(regex, "").trim();
+        }
+        return `${body}\n\n${this.jiraIssue.key}`.trim();
+    }
+}
+exports.Updater = Updater;
 
 
 /***/ }),
@@ -306,6 +391,7 @@ exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github_client_1 = __nccwpck_require__(6960);
 const jira_client_1 = __nccwpck_require__(8208);
+const updater_1 = __nccwpck_require__(3235);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const githubToken = core.getInput("github-token", { required: true });
@@ -329,25 +415,36 @@ function run() {
             core.warning("⚠️ Could not get pull request number, exiting");
             return;
         }
-        const issueType = yield jiraClient.getIssueType(jiraKey);
-        if (!issueType) {
-            core.warning("⚠️ Could not get issue type, exiting");
+        const jiraIssue = yield jiraClient.getIssue(jiraKey);
+        if (!jiraIssue) {
+            core.warning("⚠️ Could not get issue, exiting");
             return;
         }
         core.info(`📄 Context details`);
         core.info(`    Branch name: ${branchName}`);
         core.info(`    Pull Request: ${pullRequest}`);
         core.info(`    Jira key: ${jiraKey}`);
-        core.info(`    Issue type: ${issueType}`);
+        core.info(`    Issue type: ${jiraIssue}`);
         if (addLabelWithIssueType) {
             core.info(`📄 Adding pull request label`);
-            if (!(yield githubClient.labelExists(issueType))) {
-                core.info(`    Creating label: ${issueType}`);
-                yield githubClient.createLabel(issueType, issueTypeLabelDescription, issueTypeLabelColor);
+            if (!jiraIssue.type) {
+                core.info(`   Issue type undefined for ${jiraIssue}`);
             }
-            core.info(`    Adding label: ${issueType} to: ${pullRequest}`);
-            yield githubClient.addLabelsToIssue(pullRequest, [issueType]);
+            else {
+                if (!(yield githubClient.labelExists(jiraIssue.type))) {
+                    core.info(`    Creating label: ${jiraIssue.type}`);
+                    yield githubClient.createLabel(jiraIssue.type, issueTypeLabelDescription, issueTypeLabelColor);
+                }
+                core.info(`    Adding label: ${jiraIssue.type} to: ${pullRequest}`);
+                yield githubClient.addLabelsToIssue(pullRequest, [jiraIssue.type]);
+            }
         }
+        const updater = new updater_1.Updater(jiraIssue);
+        pullRequest.title = updater.title(pullRequest.title);
+        pullRequest.body = updater.body(pullRequest.body);
+        core.info(`📄 Updating pull request title and body`);
+        yield githubClient.updatePullRequest(pullRequest);
+        core.info(`📄 Finished`);
     });
 }
 exports.run = run;

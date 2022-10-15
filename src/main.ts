@@ -2,6 +2,7 @@ import * as core from "@actions/core";
 
 import { GithubClient } from "./common/github_client";
 import { JiraClient } from "./common/jira_client";
+import { Updater } from "./common/updater";
 
 export async function run() {
   const githubToken = core.getInput("github-token", { required: true });
@@ -41,9 +42,9 @@ export async function run() {
     return;
   }
 
-  const issueType = await jiraClient.getIssueType(jiraKey);
-  if (!issueType) {
-    core.warning("⚠️ Could not get issue type, exiting");
+  const jiraIssue = await jiraClient.getIssue(jiraKey);
+  if (!jiraIssue) {
+    core.warning("⚠️ Could not get issue, exiting");
     return;
   }
 
@@ -51,23 +52,36 @@ export async function run() {
   core.info(`    Branch name: ${branchName}`);
   core.info(`    Pull Request: ${pullRequest}`);
   core.info(`    Jira key: ${jiraKey}`);
-  core.info(`    Issue type: ${issueType}`);
+  core.info(`    Issue type: ${jiraIssue}`);
 
   if (addLabelWithIssueType) {
     core.info(`📄 Adding pull request label`);
 
-    if (!(await githubClient.labelExists(issueType))) {
-      core.info(`    Creating label: ${issueType}`);
-      await githubClient.createLabel(
-        issueType,
-        issueTypeLabelDescription,
-        issueTypeLabelColor
-      );
-    }
+    if (!jiraIssue.type) {
+      core.info(`   Issue type undefined for ${jiraIssue}`);
+    } else {
+      if (!(await githubClient.labelExists(jiraIssue.type))) {
+        core.info(`    Creating label: ${jiraIssue.type}`);
+        await githubClient.createLabel(
+          jiraIssue.type,
+          issueTypeLabelDescription,
+          issueTypeLabelColor
+        );
+      }
 
-    core.info(`    Adding label: ${issueType} to: ${pullRequest}`);
-    await githubClient.addLabelsToIssue(pullRequest, [issueType]);
+      core.info(`    Adding label: ${jiraIssue.type} to: ${pullRequest}`);
+      await githubClient.addLabelsToIssue(pullRequest, [jiraIssue.type]);
+    }
   }
+
+  const updater = new Updater(jiraIssue);
+  pullRequest.title = updater.title(pullRequest.title);
+  pullRequest.body = updater.body(pullRequest.body);
+
+  core.info(`📄 Updating pull request title and body`);
+  await githubClient.updatePullRequest(pullRequest);
+
+  core.info(`📄 Finished`);
 }
 
 run();

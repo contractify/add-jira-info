@@ -4,7 +4,11 @@ import * as core from "@actions/core";
 export type GithubClientType = ReturnType<typeof github.getOctokit>;
 
 class GithubPullRequest {
-  constructor(public number: number, public title: string) {}
+  constructor(
+    public number: number,
+    public title: string,
+    public body: string | undefined
+  ) {}
 
   toString(): string {
     return `${this.number} | ${this.title}`;
@@ -96,6 +100,16 @@ export class GithubClient {
     }
   }
 
+  async updatePullRequest(pullRequest: GithubPullRequest): Promise<void> {
+    await this.client.rest.pulls.update({
+      owner: this.owner,
+      repo: this.repo,
+      pull_number: pullRequest.number,
+      title: pullRequest.title,
+      body: pullRequest.body,
+    });
+  }
+
   private async getPullRequestByNumber(
     number: number
   ): Promise<GithubPullRequest | undefined> {
@@ -106,7 +120,11 @@ export class GithubClient {
         pull_number: number,
       });
 
-      return new GithubPullRequest(response.data.number, response.data.title);
+      return new GithubPullRequest(
+        response.data.number,
+        response.data.title.trim(),
+        response.data.body?.trim()
+      );
     } catch (error: any) {
       if (error.response?.status === 404) {
         return undefined;
@@ -136,7 +154,11 @@ export class GithubClient {
         return undefined;
       }
 
-      return new GithubPullRequest(pullRequest.number, pullRequest.title);
+      return new GithubPullRequest(
+        pullRequest.number,
+        pullRequest.title.trim(),
+        pullRequest.body?.trim()
+      );
     } catch (error: any) {
       if (error.response?.status === 404) {
         return undefined;
