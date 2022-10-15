@@ -245,9 +245,8 @@ class JiraClient {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const res = yield this.client.get(`${this.baseUrl}/issue/${key}?fields=issuetype`);
+                const res = yield this.client.get(this.getRestApiUrl(`issue/${key}?fields=issuetype`));
                 const body = yield res.readBody();
-                console.log(body);
                 const obj = JSON.parse(body);
                 return (_a = obj.fields.issuetype.name) === null || _a === void 0 ? void 0 : _a.toLowerCase();
             }
@@ -258,6 +257,9 @@ class JiraClient {
                 throw error;
             }
         });
+    }
+    getRestApiUrl(endpoint) {
+        return `${this.baseUrl}/rest/api/3/${endpoint}`;
     }
 }
 exports.JiraClient = JiraClient;
