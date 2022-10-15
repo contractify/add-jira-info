@@ -106,10 +106,7 @@ export class GithubClient {
         pull_number: number,
       });
 
-      return {
-        number: response.data.number,
-        title: response.data.title,
-      };
+      return new GithubPullRequest(response.data.number, response.data.title);
     } catch (error: any) {
       if (error.response?.status === 404) {
         return undefined;
