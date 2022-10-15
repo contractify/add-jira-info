@@ -21,15 +21,16 @@ describe("get jira issue type", () => {
         issuetype: {
           name: "Story",
         },
+        summary: "My Issue",
       },
     };
 
     nock("https://base-url")
-      .get("/rest/api/3/issue/PRJ-123?fields=issuetype")
+      .get("/rest/api/3/issue/PRJ-123?fields=issuetype,summary")
       .reply(200, () => response);
 
-    const issueType = await client.getIssueType(new JiraKey("PRJ", "123"));
-    expect(issueType).toBe("story");
+    const issue = await client.getIssue(new JiraKey("PRJ", "123"));
+    expect(issue?.type).toBe("story");
   });
 });
 
