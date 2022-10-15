@@ -10,13 +10,12 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  checks: write
+  contents: read
+  # checks: write
   pull-requests: write
 
 jobs:
-  add-jira-info:
-    name: add-jira-info
+  automation:
     runs-on: ubuntu-latest
     steps:
     - name: Add Jira issue type as label
@@ -28,3 +27,9 @@ jobs:
         jira-username: ${{ secrets.JIRA_USERNAME }}
         jira-token: ${{ secrets.JIRA_ACCESS_TOKEN }}
         jira-project-key: CTR
+
+    - name: Assign labels, reviewers and owner
+      uses: contractify/label-and-assign@v1.1.0
+      if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
+      with:
+        token: "${{ secrets.GITHUB_TOKEN }}"

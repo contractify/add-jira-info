@@ -1,0 +1,20 @@
+labels:
+  dependencies:
+    - package.json
+    - package-lock.json
+
+  github_actions:
+    - '.github/**/*'
+
+  typescript:
+    - ./**/*.ts
+
+assign:
+  dependencies:
+    - pieterclaerhout
+
+  github_actions:
+    - pieterclaerhout
+
+  typescript:
+    - pieterclaerhout
