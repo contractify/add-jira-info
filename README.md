@@ -40,7 +40,7 @@ jobs:
         jira-base-url: ${{ secrets.JIRA_BASE_URL }}
         jira-username: ${{ secrets.JIRA_USERNAME }}
         jira-token: ${{ secrets.JIRA_TOKEN }}
-        jira-project-key: ${{ secrets.JIRA_PROJECT_KEY }}
+        jira-project-key: CTR
 ```
 
 ## Inputs

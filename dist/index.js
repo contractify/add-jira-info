@@ -251,6 +251,7 @@ const helpers = __importStar(__nccwpck_require__(6401));
 const extractor = __importStar(__nccwpck_require__(9609));
 const jira = __importStar(__nccwpck_require__(4438));
 function run() {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const githubToken = core.getInput("github-token", { required: true });
         const jiraBaseUrl = core.getInput("jira-base-url", { required: true });
@@ -258,7 +259,7 @@ function run() {
         const jiraToken = core.getInput("jira-token", { required: true });
         const jiraProjectKey = core.getInput("jira-project-key", { required: true });
         console.log(JSON.stringify(github.context));
-        const branchName = github.context.ref.replace("refs/heads/", "");
+        const branchName = (((_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.head.ref) || github.context.ref).replace("refs/heads/", "");
         core.info(`📄 Branch name: ${branchName}`);
         const jiraKey = extractor.jiraKey(branchName, jiraProjectKey);
         if (!jiraKey) {

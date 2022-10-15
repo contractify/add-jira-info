@@ -14,7 +14,9 @@ export async function run() {
   const jiraProjectKey = core.getInput("jira-project-key", { required: true });
 
   console.log(JSON.stringify(github.context));
-  const branchName = github.context.ref.replace("refs/heads/", "");
+  const branchName = (
+    github.context.payload.pull_request?.head.ref || github.context.ref
+  ).replace("refs/heads/", "");
   core.info(`📄 Branch name: ${branchName}`);
 
   const jiraKey = extractor.jiraKey(branchName, jiraProjectKey);
