@@ -48,6 +48,13 @@ describe("extract jira key", () => {
     expect(jiraKey?.toString()).toBe("PRJ-3721");
   });
 
+  it("extracts the jira key if present without underscore", () => {
+    const jiraKey = client.extractJiraKey(
+      "PRJ-3721-actions-workflow-improvements"
+    );
+    expect(jiraKey?.toString()).toBe("PRJ-3721");
+  });
+
   it("extracts the jira key from a feature branch if present", () => {
     const jiraKey = client.extractJiraKey(
       "feature/PRJ-3721_actions-workflow-improvements"

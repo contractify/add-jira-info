@@ -11,7 +11,6 @@ on:
 
 permissions:
   contents: read
-  # checks: write
   pull-requests: write
 
 jobs:
@@ -29,7 +28,7 @@ jobs:
         jira-project-key: CTR
 
     - name: Assign labels, reviewers and owner
-      uses: contractify/label-and-assign@v1.1.0
+      uses: contractify/label-and-assign@v2.0.0
       if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
       with:
         token: "${{ secrets.GITHUB_TOKEN }}"
