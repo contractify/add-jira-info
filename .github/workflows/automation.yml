@@ -1,10 +1,6 @@
 name: Automation
 
 on:
-  push:
-    branches:
-      - main
-      - develop
   pull_request:
     types:
       - opened
@@ -23,13 +19,8 @@ jobs:
     name: add-jira-info
     runs-on: ubuntu-latest
     steps:
-    # - name: Branch name
-    #   run: |
-    #     echo running on branch ${GITHUB_REF##*/}
-    #     echo ${{ github.head_ref }}
-    #     echo ${{ github.head_ref || github.ref_name }}
     - name: Add Jira issue type as label
-      uses: contractify/add-jira-info@CTR-3738_initial-version
+      uses: contractify/add-jira-info@main
       if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
