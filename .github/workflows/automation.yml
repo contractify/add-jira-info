@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Add Jira issue type as label
-      uses: contractify/add-jira-info@main
+      uses: contractify/add-jira-info@CTR-3739_update-pull-request-title
       if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
