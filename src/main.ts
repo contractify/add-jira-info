@@ -10,6 +10,10 @@ export async function run() {
   const jiraToken = core.getInput("jira-token", { required: true });
   const jiraProjectKey = core.getInput("jira-project-key", { required: true });
 
+  const addLabelWithIssueType = core.getBooleanInput(
+    "add-label-with-issue-type"
+  );
+
   const githubClient = new GithubClient(githubToken);
 
   const jiraClient = new JiraClient(
@@ -45,15 +49,17 @@ export async function run() {
   core.info(`    Jira key: ${jiraKey}`);
   core.info(`    Issue type: ${issueType}`);
 
-  core.info(`📄 Adding pull request label`);
+  if (addLabelWithIssueType) {
+    core.info(`📄 Adding pull request label`);
 
-  if (!(await githubClient.labelExists(issueType))) {
-    core.info(`    Creating label: ${issueType}`);
-    await githubClient.createLabel(issueType, "Jira Issue Type");
+    if (!(await githubClient.labelExists(issueType))) {
+      core.info(`    Creating label: ${issueType}`);
+      await githubClient.createLabel(issueType, "Jira Issue Type");
+    }
+
+    core.info(`    Adding label: ${issueType} to: ${pullRequest}`);
+    await githubClient.addLabelsToIssue(pullRequest, [issueType]);
   }
-
-  core.info(`    Adding label: ${issueType} to: ${pullRequest}`);
-  await githubClient.addLabelsToIssue(pullRequest, [issueType]);
 }
 
 run();

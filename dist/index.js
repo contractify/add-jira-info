@@ -141,10 +141,7 @@ class GithubClient {
                     repo: this.repo,
                     pull_number: number,
                 });
-                return {
-                    number: response.data.number,
-                    title: response.data.title,
-                };
+                return new GithubPullRequest(response.data.number, response.data.title);
             }
             catch (error) {
                 if (((_a = error.response) === null || _a === void 0 ? void 0 : _a.status) === 404) {
@@ -316,6 +313,7 @@ function run() {
         const jiraUsername = core.getInput("jira-username", { required: true });
         const jiraToken = core.getInput("jira-token", { required: true });
         const jiraProjectKey = core.getInput("jira-project-key", { required: true });
+        const addLabelWithIssueType = core.getBooleanInput("add-label-with-issue-type");
         const githubClient = new github_client_1.GithubClient(githubToken);
         const jiraClient = new jira_client_1.JiraClient(jiraBaseUrl, jiraUsername, jiraToken, jiraProjectKey);
         const pullRequest = yield githubClient.getPullRequest();
@@ -339,13 +337,15 @@ function run() {
         core.info(`    Pull Request: ${pullRequest}`);
         core.info(`    Jira key: ${jiraKey}`);
         core.info(`    Issue type: ${issueType}`);
-        core.info(`📄 Adding pull request label`);
-        if (!(yield githubClient.labelExists(issueType))) {
-            core.info(`    Creating label: ${issueType}`);
-            yield githubClient.createLabel(issueType, "Jira Issue Type");
+        if (addLabelWithIssueType) {
+            core.info(`📄 Adding pull request label`);
+            if (!(yield githubClient.labelExists(issueType))) {
+                core.info(`    Creating label: ${issueType}`);
+                yield githubClient.createLabel(issueType, "Jira Issue Type");
+            }
+            core.info(`    Adding label: ${issueType} to: ${pullRequest}`);
+            yield githubClient.addLabelsToIssue(pullRequest, [issueType]);
         }
-        core.info(`    Adding label: ${issueType} to: ${pullRequest}`);
-        yield githubClient.addLabelsToIssue(pullRequest, [issueType]);
     });
 }
 exports.run = run;
