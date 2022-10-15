@@ -28,6 +28,14 @@ inputs:
     description: 'The description of the label to use for the issue type'
     default: 'Jira Issue Type'
     required: false
+  add-jira-key-tot-title:
+    description: 'If set to true, the title of the pull request will be prefixed with the Jira issue key'
+    default: "true"
+    required: false
+  add-jira-key-tot-body:
+    description: 'If set to true, the body of the pull request will be suffix with a link to the Jira issue'
+    default: "true"
+    required: false
 
 branding:
   icon: user

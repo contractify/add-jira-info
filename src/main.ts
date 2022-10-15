@@ -18,6 +18,8 @@ export async function run() {
     core.getInput("issue-type-label-color") || "FBCA04";
   const issueTypeLabelDescription =
     core.getInput("issue-type-label-description") || "Jira Issue Type";
+  const addJiraKeyToTitle = core.getBooleanInput("add-jira-key-tot-title");
+  const addJiraKeyToBody = core.getBooleanInput("add-jira-key-tot-body");
 
   const githubClient = new GithubClient(githubToken);
 
@@ -74,13 +76,24 @@ export async function run() {
     }
   }
 
-  const updater = new Updater(jiraIssue);
-  pullRequest.title = updater.title(pullRequest.title);
-  pullRequest.body = updater.body(pullRequest.body);
+  if (addJiraKeyToTitle || addJiraKeyToBody) {
+    core.info(`📄 Adding Jira key to pull request`);
 
-  core.info(`📄 Updating pull request title and body`);
-  core.info(`    Title: ${pullRequest.title}`);
-  await githubClient.updatePullRequest(pullRequest);
+    const updater = new Updater(jiraIssue);
+
+    if (addJiraKeyToTitle) {
+      core.info(`    Updating pull request title`);
+      pullRequest.title = updater.title(pullRequest.title);
+    }
+
+    if (addJiraKeyToBody) {
+      core.info(`    Updating pull request body`);
+      pullRequest.body = updater.body(pullRequest.body);
+    }
+
+    core.info(`    Updating pull request`);
+    await githubClient.updatePullRequest(pullRequest);
+  }
 
   core.info(`📄 Finished`);
 }

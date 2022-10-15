@@ -403,6 +403,8 @@ function run() {
         const addLabelWithIssueType = core.getBooleanInput("add-label-with-issue-type");
         const issueTypeLabelColor = core.getInput("issue-type-label-color") || "FBCA04";
         const issueTypeLabelDescription = core.getInput("issue-type-label-description") || "Jira Issue Type";
+        const addJiraKeyToTitle = core.getBooleanInput("add-jira-key-tot-title");
+        const addJiraKeyToBody = core.getBooleanInput("add-jira-key-tot-body");
         const githubClient = new github_client_1.GithubClient(githubToken);
         const jiraClient = new jira_client_1.JiraClient(jiraBaseUrl, jiraUsername, jiraToken, jiraProjectKey);
         const pullRequest = yield githubClient.getPullRequest();
@@ -440,12 +442,20 @@ function run() {
                 yield githubClient.addLabelsToIssue(pullRequest, [jiraIssue.type]);
             }
         }
-        const updater = new updater_1.Updater(jiraIssue);
-        pullRequest.title = updater.title(pullRequest.title);
-        pullRequest.body = updater.body(pullRequest.body);
-        core.info(`📄 Updating pull request title and body`);
-        core.info(`    Title: ${pullRequest.title}`);
-        yield githubClient.updatePullRequest(pullRequest);
+        if (addJiraKeyToTitle || addJiraKeyToBody) {
+            core.info(`📄 Adding Jira key to pull request`);
+            const updater = new updater_1.Updater(jiraIssue);
+            if (addJiraKeyToTitle) {
+                core.info(`    Updating pull request title`);
+                pullRequest.title = updater.title(pullRequest.title);
+            }
+            if (addJiraKeyToBody) {
+                core.info(`    Updating pull request body`);
+                pullRequest.body = updater.body(pullRequest.body);
+            }
+            core.info(`    Updating pull request`);
+            yield githubClient.updatePullRequest(pullRequest);
+        }
         core.info(`📄 Finished`);
     });
 }
