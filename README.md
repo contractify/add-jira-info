@@ -1,7 +1,5 @@
 # Add Jira info to a pull request
 
-## About
-
 Add [Contractify](https://contractify.io), we like to keeps things nice, tidy and
 organized. We are using [Jira](https://www.atlassian.com/nl/software/jira) for
 our issue management and [GitHub](https://www.github.com) for our version control.

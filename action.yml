@@ -38,7 +38,7 @@ inputs:
     required: false
 
 branding:
-  icon: user
+  icon: tag
   color: green
 
 runs:
