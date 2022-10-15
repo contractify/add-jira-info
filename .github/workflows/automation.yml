@@ -25,11 +25,10 @@ jobs:
     steps:
     - name: Add Jira issue type as label
       uses: contractify/add-jira-info@CTR-3738_initial-version
-      # uses: ../
       if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         jira-base-url: ${{ secrets.JIRA_BASE_URL }}
         jira-username: ${{ secrets.JIRA_USERNAME }}
-        jira-token: ${{ secrets.JIRA_TOKEN }}
+        jira-token: ${{ secrets.JIRA_ACCESS_TOKEN }}
         jira-project-key: ${{ secrets.JIRA_PROJECT_KEY }}

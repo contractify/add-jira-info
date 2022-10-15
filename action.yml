@@ -2,7 +2,7 @@ name: 'Add Jira info to pull request'
 description: 'Automatically add Jira info to a pull request'
 author: 'Contractify'
 inputs:
-  token:
+  github-token:
     description: 'The GITHUB_TOKEN secret'
   jira-username:
     description: 'Username used to access the Jira REST API.  Must have read access to your Jira Projects & Issues.'
