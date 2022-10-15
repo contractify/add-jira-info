@@ -3,10 +3,13 @@ import * as core from "@actions/core";
 
 export type GithubClientType = ReturnType<typeof github.getOctokit>;
 
-type GithubPullRequest = {
-  number: number;
-  title: string;
-};
+class GithubPullRequest {
+  constructor(public number: number, public title: string) {}
+
+  toString(): string {
+    return `${this.number} | ${this.title}`;
+  }
+}
 
 export class GithubClient {
   client: GithubClientType;
@@ -39,16 +42,12 @@ export class GithubClient {
     }
   }
 
-  async createLabelIfNotExists(
+  async createLabel(
     label: string,
     description: string = "",
     color: string = "FBCA04"
   ): Promise<void> {
     try {
-      if (await this.labelExists(label)) {
-        return;
-      }
-
       await this.client.rest.issues.createLabel({
         owner: this.owner,
         repo: this.repo,
@@ -64,7 +63,7 @@ export class GithubClient {
     }
   }
 
-  private async labelExists(label: string): Promise<boolean> {
+  async labelExists(label: string): Promise<boolean> {
     try {
       await this.client.rest.issues.getLabel({
         owner: this.owner,
@@ -80,12 +79,15 @@ export class GithubClient {
     return true;
   }
 
-  async addLabelsToIssue(issue: number, labels: string[]): Promise<void> {
+  async addLabelsToIssue(
+    pullRequest: GithubPullRequest,
+    labels: string[]
+  ): Promise<void> {
     try {
       await this.client.rest.issues.addLabels({
         owner: this.owner,
         repo: this.repo,
-        issue_number: issue,
+        issue_number: pullRequest.number,
         labels: labels,
       });
     } catch (error: any) {
@@ -137,10 +139,7 @@ export class GithubClient {
         return undefined;
       }
 
-      return {
-        number: pullRequest.number,
-        title: pullRequest.title,
-      };
+      return new GithubPullRequest(pullRequest.number, pullRequest.title);
     } catch (error: any) {
       if (error.response?.status === 404) {
         return undefined;

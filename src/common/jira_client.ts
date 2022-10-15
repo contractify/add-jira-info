@@ -1,7 +1,8 @@
-import axios, { AxiosInstance } from "axios";
+import { HttpClient } from "@actions/http-client";
+import { BasicCredentialHandler } from "@actions/http-client/lib/auth";
 
 export class JiraKey {
-  constructor(private projectKey: string, private number: string) {}
+  constructor(public projectKey: string, public number: string) {}
 
   toString(): string {
     return `${this.projectKey}-${this.number}`;
@@ -9,7 +10,7 @@ export class JiraKey {
 }
 
 export class JiraClient {
-  client: AxiosInstance;
+  client: HttpClient;
 
   constructor(
     private baseUrl: string,
@@ -17,14 +18,10 @@ export class JiraClient {
     private token: string,
     private projectKey: string
   ) {
-    const encodedToken = Buffer.from(`${this.username}:${this.token}`).toString(
-      "base64"
-    );
+    const credentials = new BasicCredentialHandler(this.username, this.token);
 
-    this.client = axios.create({
-      baseURL: `${this.baseUrl}/rest/api/3`,
-      timeout: 2000,
-      headers: { Authorization: `Basic ${encodedToken}` },
+    this.client = new HttpClient("add-jira-info-action", [credentials], {
+      socketTimeout: 2000,
     });
   }
 
@@ -41,8 +38,13 @@ export class JiraClient {
 
   async getIssueType(key: JiraKey): Promise<string | undefined> {
     try {
-      const response = await this.client.get(`/issue/${key}?fields=issuetype`);
-      return response.data.fields.issuetype.name?.toLowerCase();
+      const res = await this.client.get(
+        `${this.baseUrl}/issue/${key}?fields=issuetype`
+      );
+      const body: string = await res.readBody();
+      console.log(body);
+      const obj = JSON.parse(body);
+      return obj.fields.issuetype.name?.toLowerCase();
     } catch (error: any) {
       if (error.response) {
         throw new Error(JSON.stringify(error.response, null, 4));

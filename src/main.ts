@@ -39,18 +39,21 @@ export async function run() {
     return;
   }
 
-  core.info(`📄 Branch name: ${branchName}`);
-  core.info(`📄 Pull Request: ${pullRequest.number} | ${pullRequest.title}`);
-  core.info(`📄 Jira key: ${jiraKey}`);
-  core.info(`📄 Issue type: ${issueType}`);
+  core.info(`📄 Context details`);
+  core.info(`    Branch name: ${branchName}`);
+  core.info(`    Pull Request: ${pullRequest}`);
+  core.info(`    Jira key: ${jiraKey}`);
+  core.info(`    Issue type: ${issueType}`);
 
-  core.info(`📄 Creating label: ${issueType}`);
-  await githubClient.createLabelIfNotExists(issueType, "Jira Issue Type");
+  core.info(`📄 Adding pull request label`);
 
-  core.info(`📄 Adding label: ${issueType} to: ${pullRequest.number}`);
-  await githubClient.addLabelsToIssue(pullRequest.number, [issueType]);
+  if (!(await githubClient.labelExists(issueType))) {
+    core.info(`    Creating label: ${issueType}`);
+    await githubClient.createLabel(issueType, "Jira Issue Type");
+  }
 
-  core.info(`📄 Finished for ${pullRequest.number}`);
+  core.info(`    Adding label: ${issueType} to: ${pullRequest}`);
+  await githubClient.addLabelsToIssue(pullRequest, [issueType]);
 }
 
 run();
