@@ -1,0 +1,38 @@
+name: 'Add Jira info to pull request'
+description: 'Automatically add Jira info to a pull request'
+author: 'Contractify'
+inputs:
+  github-token:
+    description: 'The GITHUB_TOKEN secret'
+  jira-username:
+    description: 'Username used to access the Jira REST API.  Must have read access to your Jira Projects & Issues.'
+  jira-token:
+    description: 'API Token used to access the Jira REST API. Must have read access to your Jira Projects & Issues.'
+    required: true
+  jira-base-url:
+    description: 'The subdomain of JIRA cloud that you use to access it. Ex: "https://your-domain.atlassian.net"'
+    required: true
+  jira-project-key:
+    description: 'Key of project in jira. First part of issue key'
+    required: true
+    default: ''
+  add-label-with-issue-type:
+    description: 'If set to true, a label with the issue type from Jira will be added to the pull request'
+    default: "true"
+    required: false
+  issue-type-label-color:
+    description: 'The hex color of the label to use for the issue type'
+    default: 'FBCA04'
+    required: false
+  issue-type-label-description:
+    description: 'The description of the label to use for the issue type'
+    default: 'Jira Issue Type'
+    required: false
+
+branding:
+  icon: user
+  color: green
+
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
