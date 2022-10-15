@@ -53,7 +53,12 @@ export class GithubClient {
         color: color,
       });
     } catch (error: any) {
-      core.error(`🚨 Failed to create label: ${error}`);
+      if (error.response) {
+        if (error.response.code === "already_exists") {
+          return;
+        }
+        throw new Error(JSON.stringify(error.response));
+      }
       throw error;
     }
   }
