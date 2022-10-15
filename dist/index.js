@@ -341,7 +341,7 @@ class Updater {
             const regex = new RegExp(`${pattern}`, "i");
             body = body.replace(regex, "").trim();
         }
-        return `${body}\n\n${this.jiraIssue.key}`.trim();
+        return `${body}\n\n${this.jiraIssue.key} | ${this.jiraIssue.title}`.trim();
     }
 }
 exports.Updater = Updater;
@@ -443,6 +443,7 @@ function run() {
         pullRequest.title = updater.title(pullRequest.title);
         pullRequest.body = updater.body(pullRequest.body);
         core.info(`📄 Updating pull request title and body`);
+        core.info(`    Title: ${pullRequest.title}`);
         yield githubClient.updatePullRequest(pullRequest);
         core.info(`📄 Finished`);
     });

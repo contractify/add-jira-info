@@ -79,6 +79,7 @@ export async function run() {
   pullRequest.body = updater.body(pullRequest.body);
 
   core.info(`📄 Updating pull request title and body`);
+  core.info(`    Title: ${pullRequest.title}`);
   await githubClient.updatePullRequest(pullRequest);
 
   core.info(`📄 Finished`);
