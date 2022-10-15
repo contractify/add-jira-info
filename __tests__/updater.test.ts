@@ -6,7 +6,7 @@ describe("title", () => {
 
   beforeEach(() => {
     const jiraKey = new JiraKey("PRJ", "1234");
-    const jiraIssue = new JiraIssue(jiraKey, "title", "story");
+    const jiraIssue = new JiraIssue(jiraKey, "http://jira", "title", "story");
     updater = new Updater(jiraIssue);
   });
 
@@ -72,7 +72,7 @@ describe("body", () => {
 
   beforeEach(() => {
     const jiraKey = new JiraKey("PRJ", "1234");
-    const jiraIssue = new JiraIssue(jiraKey, "title", "story");
+    const jiraIssue = new JiraIssue(jiraKey, "http://jira", "title", "story");
     updater = new Updater(jiraIssue);
   });
 
@@ -80,35 +80,35 @@ describe("body", () => {
     const body = undefined;
 
     const actual = updater.body(body);
-    expect(actual).toBe("PRJ-1234 | title");
+    expect(actual).toBe("[**PRJ-1234** | title](http://jira)");
   });
 
   it("adds the key to an empty body", () => {
     const body = "";
 
     const actual = updater.body(body);
-    expect(actual).toBe("PRJ-1234 | title");
+    expect(actual).toBe("[**PRJ-1234** | title](http://jira)");
   });
 
   it("adds the key to an existing body", () => {
     const body = "test";
 
     const actual = updater.body(body);
-    expect(actual).toBe("test\n\nPRJ-1234 | title");
+    expect(actual).toBe("test\n\n[**PRJ-1234** | title](http://jira)");
   });
 
   it("adds the key to an existing body with suffix", () => {
     const body = "test\n\nPRJ-";
 
     const actual = updater.body(body);
-    expect(actual).toBe("test\n\nPRJ-1234 | title");
+    expect(actual).toBe("test\n\n[**PRJ-1234** | title](http://jira)");
   });
 
   it("adds the key to an existing body with suffix", () => {
     const body = "test\n\nReferences PRJ-";
 
     const actual = updater.body(body);
-    expect(actual).toBe("test\n\nPRJ-1234 | title");
+    expect(actual).toBe("test\n\n[**PRJ-1234** | title](http://jira)");
   });
 
   it("does nothing if the body contains the key already", () => {

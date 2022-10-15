@@ -44,6 +44,6 @@ export class Updater {
       body = body.replace(regex, "").trim();
     }
 
-    return `${body}\n\n${this.jiraIssue.key} | ${this.jiraIssue.title}`.trim();
+    return `${body}\n\n[**${this.jiraIssue.key}** | ${this.jiraIssue.title}](${this.jiraIssue.link})`.trim();
   }
 }

@@ -231,8 +231,9 @@ class JiraKey {
 }
 exports.JiraKey = JiraKey;
 class JiraIssue {
-    constructor(key, title, type) {
+    constructor(key, link, title, type) {
         this.key = key;
+        this.link = link;
         this.title = title;
         this.type = type;
     }
@@ -270,15 +271,15 @@ class JiraClient {
                 const obj = JSON.parse(body);
                 var issuetype = undefined;
                 var title = undefined;
-                for (let key in obj.fields) {
-                    if (key === "issuetype") {
-                        issuetype = (_a = obj.fields[key].name) === null || _a === void 0 ? void 0 : _a.toLowerCase();
+                for (let field in obj.fields) {
+                    if (field === "issuetype") {
+                        issuetype = (_a = obj.fields[field].name) === null || _a === void 0 ? void 0 : _a.toLowerCase();
                     }
-                    if (key === "summary") {
-                        title = obj.fields[key];
+                    else if (field === "summary") {
+                        title = obj.fields[field];
                     }
                 }
-                return new JiraIssue(key, title, issuetype);
+                return new JiraIssue(key, `${this.baseUrl}/browse/${key}`, title, issuetype);
             }
             catch (error) {
                 if (error.response) {
@@ -341,7 +342,7 @@ class Updater {
             const regex = new RegExp(`${pattern}`, "i");
             body = body.replace(regex, "").trim();
         }
-        return `${body}\n\n${this.jiraIssue.key} | ${this.jiraIssue.title}`.trim();
+        return `${body}\n\n[**${this.jiraIssue.key}** | ${this.jiraIssue.title}](${this.jiraIssue.link})`.trim();
     }
 }
 exports.Updater = Updater;

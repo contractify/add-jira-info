@@ -12,6 +12,7 @@ export class JiraKey {
 export class JiraIssue {
   constructor(
     public key: JiraKey,
+    public link: string,
     public title: string | undefined,
     public type: string | undefined
   ) {}
@@ -58,16 +59,20 @@ export class JiraClient {
 
       var issuetype: string | undefined = undefined;
       var title: string | undefined = undefined;
-      for (let key in obj.fields) {
-        if (key === "issuetype") {
-          issuetype = obj.fields[key].name?.toLowerCase();
-        }
-        if (key === "summary") {
-          title = obj.fields[key];
+      for (let field in obj.fields) {
+        if (field === "issuetype") {
+          issuetype = obj.fields[field].name?.toLowerCase();
+        } else if (field === "summary") {
+          title = obj.fields[field];
         }
       }
 
-      return new JiraIssue(key, title, issuetype);
+      return new JiraIssue(
+        key,
+        `${this.baseUrl}/browse/${key}`,
+        title,
+        issuetype
+      );
     } catch (error: any) {
       if (error.response) {
         throw new Error(JSON.stringify(error.response, null, 4));
