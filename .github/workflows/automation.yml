@@ -30,7 +30,7 @@ jobs:
         jira-project-key: CTR
 
     - name: Assign labels, reviewers and owner
-      uses: contractify/label-and-assign@v2.1.0
+      uses: contractify/label-and-assign@v2
       if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
       with:
         token: "${{ secrets.GITHUB_TOKEN }}"
