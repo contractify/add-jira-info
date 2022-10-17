@@ -1,10 +1,16 @@
 import * as core from "@actions/core";
+import * as github from "@actions/github";
 
 import { GithubClient } from "./common/github_client";
 import { JiraClient } from "./common/jira_client";
 import { Updater } from "./common/updater";
 
 export async function run() {
+  if (github.context.actor === "dependabot[bot]") {
+    core.info(`🚨 Dependabot, ignoring`);
+    return;
+  }
+
   const githubToken = core.getInput("github-token", { required: true });
   const jiraBaseUrl = core.getInput("jira-base-url", { required: true });
   const jiraUsername = core.getInput("jira-username", { required: true });

@@ -390,11 +390,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
+const github = __importStar(__nccwpck_require__(5438));
 const github_client_1 = __nccwpck_require__(6960);
 const jira_client_1 = __nccwpck_require__(8208);
 const updater_1 = __nccwpck_require__(3235);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
+        if (github.context.actor === "dependabot[bot]") {
+            core.info(`🚨 Dependabot, ignoring`);
+            return;
+        }
         const githubToken = core.getInput("github-token", { required: true });
         const jiraBaseUrl = core.getInput("jira-base-url", { required: true });
         const jiraUsername = core.getInput("jira-username", { required: true });

@@ -50,7 +50,6 @@ jobs:
     steps:
     - name: Add Jira info
       uses: contractify/add-jira-info@v1
-      if: ${{ github.actor != 'dependabot[bot]' }}
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         jira-base-url: ${{ secrets.JIRA_BASE_URL }}
