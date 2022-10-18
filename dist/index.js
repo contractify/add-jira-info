@@ -414,6 +414,8 @@ function run() {
         const jiraClient = new jira_client_1.JiraClient(jiraBaseUrl, jiraUsername, jiraToken, jiraProjectKey);
         const pullRequest = yield githubClient.getPullRequest();
         const branchName = githubClient.getBranchName();
+        core.info(`📄 Context details`);
+        core.info(`    Branch name: ${branchName}`);
         const jiraKey = jiraClient.extractJiraKey(branchName);
         if (!jiraKey) {
             core.warning("⚠️ No Jira key found in branch name, exiting");
@@ -428,8 +430,6 @@ function run() {
             core.warning("⚠️ Could not get issue, exiting");
             return;
         }
-        core.info(`📄 Context details`);
-        core.info(`    Branch name: ${branchName}`);
         core.info(`    Pull Request: ${pullRequest}`);
         core.info(`    Jira key: ${jiraKey}`);
         core.info(`    Issue type: ${jiraIssue}`);

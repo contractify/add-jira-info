@@ -1,6 +1,6 @@
 {
   "name": "add-jira-info",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Automatically add Jira info to a pull request.",
   "main": "lib/main.js",
   "scripts": {

@@ -38,6 +38,14 @@ export async function run() {
 
   const pullRequest = await githubClient.getPullRequest();
   const branchName = githubClient.getBranchName();
+  core.info(`📄 Context details`);
+  core.info(`    Branch name: ${branchName}`);
+
+  if (branchName.startsWith("dependabot")) {
+    core.info(`🚨 Dependabot, ignoring`);
+    return;
+  }
+
   const jiraKey = jiraClient.extractJiraKey(branchName);
 
   if (!jiraKey) {
@@ -55,9 +63,6 @@ export async function run() {
     core.warning("⚠️ Could not get issue, exiting");
     return;
   }
-
-  core.info(`📄 Context details`);
-  core.info(`    Branch name: ${branchName}`);
   core.info(`    Pull Request: ${pullRequest}`);
   core.info(`    Jira key: ${jiraKey}`);
   core.info(`    Issue type: ${jiraIssue}`);
