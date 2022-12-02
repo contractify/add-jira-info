@@ -104,6 +104,13 @@ describe("body", () => {
     expect(actual).toBe("test\n\n[**PRJ-1234** | title](http://jira)");
   });
 
+  it("adds the key to an existing body with reference to ticket", () => {
+    const body = "test\n\nReferences PRJ-1234";
+
+    const actual = updater.body(body);
+    expect(actual).toBe("test\n\n[**PRJ-1234** | title](http://jira)");
+  });
+
   it("adds the key to an existing body with suffix", () => {
     const body = "test\n\nReferences PRJ-";
 

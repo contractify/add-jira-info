@@ -327,13 +327,15 @@ class Updater {
         return `${this.jiraIssue.key} | ${title}`;
     }
     body(body) {
-        if (body === null || body === void 0 ? void 0 : body.includes(`${this.jiraIssue.key}`)) {
+        if ((body === null || body === void 0 ? void 0 : body.includes(`${this.jiraIssue.key}`)) &&
+            !(body === null || body === void 0 ? void 0 : body.includes(`References ${this.jiraIssue.key}`))) {
             return body;
         }
         if (!body) {
             body = "";
         }
         const patternsToStrip = [
+            `References ${this.jiraIssue.key}$`,
             `References ${this.jiraIssue.key.project}-$`,
             `${this.jiraIssue.key.project}-$`,
             `${this.jiraIssue.key}$`,

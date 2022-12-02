@@ -25,7 +25,10 @@ export class Updater {
   }
 
   body(body: string | undefined): string | undefined {
-    if (body?.includes(`${this.jiraIssue.key}`)) {
+    if (
+      body?.includes(`${this.jiraIssue.key}`) &&
+      !body?.includes(`References ${this.jiraIssue.key}`)
+    ) {
       return body;
     }
 
@@ -34,6 +37,7 @@ export class Updater {
     }
 
     const patternsToStrip = [
+      `References ${this.jiraIssue.key}$`,
       `References ${this.jiraIssue.key.project}-$`,
       `${this.jiraIssue.key.project}-$`,
       `${this.jiraIssue.key}$`,
