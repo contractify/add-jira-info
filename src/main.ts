@@ -24,8 +24,8 @@ export async function run() {
     core.getInput("issue-type-label-color") || "FBCA04";
   const issueTypeLabelDescription =
     core.getInput("issue-type-label-description") || "Jira Issue Type";
-  const addJiraKeyToTitle = core.getBooleanInput("add-jira-key-tot-title");
-  const addJiraKeyToBody = core.getBooleanInput("add-jira-key-tot-body");
+  const addJiraKeyToTitle = core.getBooleanInput("add-jira-key-to-title");
+  const addJiraKeyToBody = core.getBooleanInput("add-jira-key-to-body");
 
   const githubClient = new GithubClient(githubToken);
 
