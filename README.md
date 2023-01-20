@@ -59,8 +59,8 @@ jobs:
         add-label-with-issue-type: true
         issue-type-label-color: FBCA04
         issue-type-label-description: 'Jira Issue Type'
-        add-jira-key-tot-title: true
-        add-jira-key-tot-body: true
+        add-jira-key-to-title: true
+        add-jira-key-to-body: true
 ```
 
 The `on:` section defines when the workflow needs to run. We ussually run them
@@ -86,8 +86,8 @@ Various inputs are defined in [`action.yml`](action.yml) to let you configure th
 | `add-label-with-issue-type` | If set to `true`, a label with the issue type from Jira will be added to the pull request | `false`     | `true`    |
 | `issue-type-label-color` | The hex color to use for the issue type label | `false`     | `FBCA04`    |
 | `issue-type-label-description` | The description to use for the issue type label | `false`     | `Jira Issue Type`    |
-| `add-jira-key-tot-title` | If set to `true`, the title of the pull request will be prefixed with the Jira issue key | `false`     | `true`    |
-| `add-jira-key-tot-body` | If set to `true`, the body of the pull request will be suffix with a link to the Jira issue | `false`     | `true`    |
+| `add-jira-key-to-title` | If set to `true`, the title of the pull request will be prefixed with the Jira issue key | `false`     | `true`    |
+| `add-jira-key-to-body` | If set to `true`, the body of the pull request will be suffix with a link to the Jira issue | `false`     | `true`    |
 
 Tokens are private, so it's suggested adding them as [GitHub secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets).
 
