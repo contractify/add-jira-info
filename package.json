@@ -32,7 +32,7 @@
     "@types/js-yaml": "^4.0.5",
     "@types/minimatch": "^5.1.2",
     "@types/node": "^18.11.18",
-    "@vercel/ncc": "^0.36.0",
+    "@vercel/ncc": "^0.36.1",
     "jest": "^27.5.1",
     "prettier": "^2.8.3",
     "ts-jest": "^27.1.3",
