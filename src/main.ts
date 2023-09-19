@@ -18,7 +18,7 @@ export async function run() {
   const jiraProjectKey = core.getInput("jira-project-key", { required: true });
 
   const addLabelWithIssueType = core.getBooleanInput(
-    "add-label-with-issue-type"
+    "add-label-with-issue-type",
   );
   const issueTypeLabelColor =
     core.getInput("issue-type-label-color") || "FBCA04";
@@ -26,6 +26,9 @@ export async function run() {
     core.getInput("issue-type-label-description") || "Jira Issue Type";
   const addJiraKeyToTitle = core.getBooleanInput("add-jira-key-to-title");
   const addJiraKeyToBody = core.getBooleanInput("add-jira-key-to-body");
+  const addJiraFixVersionsToBody = core.getBooleanInput(
+    "add-jira-fix-versions-to-body",
+  );
 
   const githubClient = new GithubClient(githubToken);
 
@@ -33,7 +36,7 @@ export async function run() {
     jiraBaseUrl,
     jiraUsername,
     jiraToken,
-    jiraProjectKey
+    jiraProjectKey,
   );
 
   const pullRequest = await githubClient.getPullRequest();
@@ -78,7 +81,7 @@ export async function run() {
         await githubClient.createLabel(
           jiraIssue.type,
           issueTypeLabelDescription,
-          issueTypeLabelColor
+          issueTypeLabelColor,
         );
       }
 
@@ -100,6 +103,10 @@ export async function run() {
     if (addJiraKeyToBody) {
       core.info(`    Updating pull request body`);
       pullRequest.body = updater.body(pullRequest.body);
+    }
+
+    if (addJiraFixVersionsToBody) {
+      pullRequest.body = updater.addFixVersionsToBody(pullRequest.body);
     }
 
     core.info(`    Updating pull request`);

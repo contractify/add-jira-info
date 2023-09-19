@@ -50,4 +50,27 @@ export class Updater {
 
     return `${body}\n\n[**${this.jiraIssue.key}** | ${this.jiraIssue.title}](${this.jiraIssue.link})`.trim();
   }
+
+  addFixVersionsToBody(body: string | undefined): string | undefined {
+    const { fixVersions } = this.jiraIssue;
+
+    if (!fixVersions?.length) {
+      return body;
+    }
+
+    if (!body) {
+      body = "";
+    }
+
+    if (body.includes("**Fix versions**:")) {
+      body = body.replace(
+        /\*\*Fix versions\*\*:.*$/,
+        `**Fix versions**: ${fixVersions.join(",")}`,
+      );
+    } else {
+      body = `${body}\n\n**Fix versions**: ${fixVersions.join(",")}`.trim();
+    }
+
+    return body;
+  }
 }
