@@ -48,22 +48,23 @@ jobs:
   automation:
     runs-on: ubuntu-latest
     steps:
-    - name: Add Jira info
-      uses: contractify/add-jira-info@v1
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        jira-base-url: ${{ secrets.JIRA_BASE_URL }}
-        jira-username: ${{ secrets.JIRA_USERNAME }}
-        jira-token: ${{ secrets.JIRA_TOKEN }}
-        jira-project-key: PRJ
-        add-label-with-issue-type: true
-        issue-type-label-color: FBCA04
-        issue-type-label-description: 'Jira Issue Type'
-        add-jira-key-to-title: true
-        add-jira-key-to-body: true
+      - name: Add Jira info
+        uses: contractify/add-jira-info@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          jira-base-url: ${{ secrets.JIRA_BASE_URL }}
+          jira-username: ${{ secrets.JIRA_USERNAME }}
+          jira-token: ${{ secrets.JIRA_TOKEN }}
+          jira-project-key: PRJ
+          add-label-with-issue-type: true
+          issue-type-label-color: FBCA04
+          issue-type-label-description: "Jira Issue Type"
+          add-jira-key-to-title: true
+          add-jira-key-to-body: true
+          add-jira-fix-versions-to-body: true
 ```
 
-The `on:` section defines when the workflow needs to run. We ussually run them
+The `on:` section defines when the workflow needs to run. We usually run them
 on everything that has to do with a pull request. We also use
 `workflow_dispatch` to allow us to manually trigger the workflow.
 
@@ -76,18 +77,19 @@ We strongly suggest to store the sensitive configuration parameters as
 
 Various inputs are defined in [`action.yml`](action.yml) to let you configure the action:
 
-| Name | Description | Required | Default |
-| - | - | - | - |
-| `github-token` | Token to use to authorize label changes. Typically the GITHUB_TOKEN secret, with `contents:read` and `pull-requests:write` access | N/A |
-| `jira-base-url` | The subdomain of JIRA cloud that you use to access it. Ex: "https://your-domain.atlassian.net". | `true`     | `null`    |
-| `jira-username` | Username used to fetch Jira Issue information.  Check [below](#how-to-get-the-jira-token-and-jira-username) for more details on how to generate the token. | `true`     | `null`    |
-| `jira-token` | Token used to fetch Jira Issue information.  Check [below](#how-to-get-the-jira-token-and-jira-username) for more details on how to generate the token. | `true`     | `null`    |
-| `jira-project-key` | Key of project in jira. First part of issue key | `true`     | `null`    |
-| `add-label-with-issue-type` | If set to `true`, a label with the issue type from Jira will be added to the pull request | `false`     | `true`    |
-| `issue-type-label-color` | The hex color to use for the issue type label | `false`     | `FBCA04`    |
-| `issue-type-label-description` | The description to use for the issue type label | `false`     | `Jira Issue Type`    |
-| `add-jira-key-to-title` | If set to `true`, the title of the pull request will be prefixed with the Jira issue key | `false`     | `true`    |
-| `add-jira-key-to-body` | If set to `true`, the body of the pull request will be suffix with a link to the Jira issue | `false`     | `true`    |
+| Name                            | Description                                                                                                                                               | Required | Default           |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------- |
+| `github-token`                  | Token to use to authorize label changes. Typically the GITHUB_TOKEN secret, with `contents:read` and `pull-requests:write` access                         | N/A      |
+| `jira-base-url`                 | The subdomain of JIRA cloud that you use to access it. Ex: "https://your-domain.atlassian.net".                                                           | `true`   | `null`            |
+| `jira-username`                 | Username used to fetch Jira Issue information. Check [below](#how-to-get-the-jira-token-and-jira-username) for more details on how to generate the token. | `true`   | `null`            |
+| `jira-token`                    | Token used to fetch Jira Issue information. Check [below](#how-to-get-the-jira-token-and-jira-username) for more details on how to generate the token.    | `true`   | `null`            |
+| `jira-project-key`              | Key of project in jira. First part of issue key                                                                                                           | `true`   | `null`            |
+| `add-label-with-issue-type`     | If set to `true`, a label with the issue type from Jira will be added to the pull request                                                                 | `false`  | `true`            |
+| `issue-type-label-color`        | The hex color to use for the issue type label                                                                                                             | `false`  | `FBCA04`          |
+| `issue-type-label-description`  | The description to use for the issue type label                                                                                                           | `false`  | `Jira Issue Type` |
+| `add-jira-key-to-title`         | If set to `true`, the title of the pull request will be prefixed with the Jira issue key                                                                  | `false`  | `true`            |
+| `add-jira-key-to-body`          | If set to `true`, the body of the pull request will be suffix with a link to the Jira issue                                                               | `false`  | `true`            |
+| `add-jira-fix-versions-to-body` | If set to `true`, the body of the pull request will be suffix with the `fixVersions` from to the Jira issue                                               | `false`  | `true`            |
 
 Tokens are private, so it's suggested adding them as [GitHub secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets).
 
@@ -155,6 +157,7 @@ It will automatically be assigned to the pull request.
 ## How to get the `jira-token` and `jira-username`
 
 The Jira token is used to fetch issue information via the Jira REST API. To get the token:
+
 1. Generate an [API token via JIRA](https://confluence.atlassian.com/cloud/api-tokens-938839638.html)
 2. Add the Jira username to the `JIRA_USERNAME` secret in your project
 3. Add the Jira API token to the `JIRA_TOKEN` secret in your project
@@ -166,6 +169,7 @@ Note: The user should have the [required permissions (mentioned under GET Issue)
 Contractify is a blooming Belgian SaaS scale-up offering contract management software and services.
 
 We help business leaders, legal & finance teams to
+
 - 🗄️ centralize contracts & responsibilities, even in a decentralized organization.
 - 📝 keep track of all contracts & related mails or documents in 1 tool
 - 🔔 automate & collaborate on contract follow-up tasks
@@ -173,6 +177,7 @@ We help business leaders, legal & finance teams to
 - 📊 report on custom contract data
 
 The cloud platform is easily supplemented with full contract management support, including:
+
 - ✔️ registration and follow up of your existing & new contracts
 - ✔️ expert advice on contract management
 - ✔️ periodic reporting & status updates
