@@ -231,11 +231,12 @@ class JiraKey {
 }
 exports.JiraKey = JiraKey;
 class JiraIssue {
-    constructor(key, link, title, type) {
+    constructor(key, link, title, type, fixVersions) {
         this.key = key;
         this.link = link;
         this.title = title;
         this.type = type;
+        this.fixVersions = fixVersions;
     }
     toString() {
         return `${this.key} | ${this.type} | ${this.title}`;
@@ -266,11 +267,12 @@ class JiraClient {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const res = yield this.client.get(this.getRestApiUrl(`issue/${key}?fields=issuetype,summary`));
+                const res = yield this.client.get(this.getRestApiUrl(`issue/${key}?fields=issuetype,summary,fixVersions`));
                 const body = yield res.readBody();
                 const obj = JSON.parse(body);
                 var issuetype = undefined;
                 var title = undefined;
+                var fixVersions = undefined;
                 for (let field in obj.fields) {
                     if (field === "issuetype") {
                         issuetype = (_a = obj.fields[field].name) === null || _a === void 0 ? void 0 : _a.toLowerCase();
@@ -278,8 +280,13 @@ class JiraClient {
                     else if (field === "summary") {
                         title = obj.fields[field];
                     }
+                    else if (field === "fixVersions") {
+                        fixVersions = obj.fields[field]
+                            .map(({ name }) => name)
+                            .filter(Boolean);
+                    }
                 }
-                return new JiraIssue(key, `${this.baseUrl}/browse/${key}`, title, issuetype);
+                return new JiraIssue(key, `${this.baseUrl}/browse/${key}`, title, issuetype, fixVersions);
             }
             catch (error) {
                 if (error.response) {
@@ -345,6 +352,22 @@ class Updater {
             body = body.replace(regex, "").trim();
         }
         return `${body}\n\n[**${this.jiraIssue.key}** | ${this.jiraIssue.title}](${this.jiraIssue.link})`.trim();
+    }
+    addFixVersionsToBody(body) {
+        const { fixVersions } = this.jiraIssue;
+        if (!(fixVersions === null || fixVersions === void 0 ? void 0 : fixVersions.length)) {
+            return body;
+        }
+        if (!body) {
+            body = "";
+        }
+        if (body.includes("**Fix versions**:")) {
+            body = body.replace(/\*\*Fix versions\*\*:.*$/, `**Fix versions**: ${fixVersions.join(",")}`);
+        }
+        else {
+            body = `${body}\n\n**Fix versions**: ${fixVersions.join(",")}`.trim();
+        }
+        return body;
     }
 }
 exports.Updater = Updater;
@@ -412,6 +435,7 @@ function run() {
         const issueTypeLabelDescription = core.getInput("issue-type-label-description") || "Jira Issue Type";
         const addJiraKeyToTitle = core.getBooleanInput("add-jira-key-to-title");
         const addJiraKeyToBody = core.getBooleanInput("add-jira-key-to-body");
+        const addJiraFixVersionsToBody = core.getBooleanInput("add-jira-fix-versions-to-body");
         const githubClient = new github_client_1.GithubClient(githubToken);
         const jiraClient = new jira_client_1.JiraClient(jiraBaseUrl, jiraUsername, jiraToken, jiraProjectKey);
         const pullRequest = yield githubClient.getPullRequest();
@@ -463,6 +487,9 @@ function run() {
             if (addJiraKeyToBody) {
                 core.info(`    Updating pull request body`);
                 pullRequest.body = updater.body(pullRequest.body);
+            }
+            if (addJiraFixVersionsToBody) {
+                pullRequest.body = updater.addFixVersionsToBody(pullRequest.body);
             }
             core.info(`    Updating pull request`);
             yield githubClient.updatePullRequest(pullRequest);
