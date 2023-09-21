@@ -72,7 +72,9 @@ describe("body", () => {
 
   beforeEach(() => {
     const jiraKey = new JiraKey("PRJ", "1234");
-    const jiraIssue = new JiraIssue(jiraKey, "http://jira", "title", "story");
+    const jiraIssue = new JiraIssue(jiraKey, "http://jira", "title", "story", [
+      "v1.0.0",
+    ]);
     updater = new Updater(jiraIssue);
   });
 
@@ -123,5 +125,42 @@ describe("body", () => {
 
     const actual = updater.body(body);
     expect(actual).toBe("PRJ-1234\n\ntest");
+  });
+
+  it("adds the fixVersions to an undefined body", () => {
+    const body = undefined;
+
+    const actual = updater.addFixVersionsToBody(body);
+    expect(actual).toBe("**Fix versions**: v1.0.0");
+  });
+
+  it("adds the fixVersions to an empty body", () => {
+    const body = "";
+
+    const actual = updater.addFixVersionsToBody(body);
+    expect(actual).toBe("**Fix versions**: v1.0.0");
+  });
+
+  it("adds the fixVersions to an existing body", () => {
+    const body = "test";
+
+    const actual = updater.addFixVersionsToBody(body);
+    expect(actual).toBe("test\n\n**Fix versions**: v1.0.0");
+  });
+
+  it("adds the fixVersions to an existing body with reference to ticket", () => {
+    const body = "test\n\nReferences PRJ-1234";
+
+    const actual = updater.addFixVersionsToBody(body);
+    expect(actual).toBe(
+      "test\n\nReferences PRJ-1234\n\n**Fix versions**: v1.0.0",
+    );
+  });
+
+  it("update the fixVersions if the body contains the fixVersions already", () => {
+    const body = "**Fix versions**: v0.9.9";
+
+    const actual = updater.addFixVersionsToBody(body);
+    expect(actual).toBe("**Fix versions**: v1.0.0");
   });
 });
