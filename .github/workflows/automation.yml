@@ -29,8 +29,6 @@ jobs:
         jira-token: ${{ secrets.JIRA_ACCESS_TOKEN }}
         jira-project-key: CTR
 
-    - name: Assign labels, reviewers and owner
-      uses: contractify/label-and-assign@v2
-      if: ${{ github.actor != 'dependabot[bot]' }}
+    - uses: toshimaru/auto-author-assign@v2.0.0
       with:
-        token: "${{ secrets.GITHUB_TOKEN }}"
+        repo-token: "${{ secrets.GITHUB_TOKEN }}"
