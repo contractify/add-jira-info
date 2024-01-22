@@ -29,6 +29,6 @@ jobs:
         jira-token: ${{ secrets.JIRA_ACCESS_TOKEN }}
         jira-project-key: CTR
 
-    - uses: toshimaru/auto-author-assign@v2.0.1
+    - uses: toshimaru/auto-author-assign@v2.1.0
       with:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
