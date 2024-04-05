@@ -42,15 +42,34 @@ export class JiraClient {
     });
   }
 
-  extractJiraKey(input: string): JiraKey | undefined {
-    const regex = new RegExp(`${this.projectKey}-(?<number>\\d+)`, "i");
-    const match = input.match(regex);
+  extractJiraKey(input: string): JiraKey | undefined {  
+    /** 
+     * Allows for grabbing of multiple keys when given as the follwoing
+     *  jira-project-key: |-
+            foo
+            bar
+    * or 1 key if given only as
+        jira-project-key: foo
+    */
+    const keys = this.projectKey
+    .split(/[\r\n]/)
+    .map(input => input.trim())
+    .filter(input => input !== ''); // grab 1 or many project keys
 
-    if (!match?.groups?.number) {
-      return undefined;
-    }
+    let matchingKey: JiraKey | undefined = undefined
 
-    return new JiraKey(this.projectKey, match?.groups?.number);
+    keys.forEach(projectKey => {
+      const regex = new RegExp(`${projectKey}-(?<number>\\d+)`, "i");
+      const match = input.match(regex);
+
+      if (match?.groups?.number) {
+        matchingKey = new JiraKey(projectKey, match?.groups?.number)
+      }
+    });
+
+   
+    return matchingKey
+
   }
 
   async getIssue(key: JiraKey): Promise<JiraIssue | undefined> {
