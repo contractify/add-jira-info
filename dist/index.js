@@ -255,13 +255,28 @@ class JiraClient {
         });
     }
     extractJiraKey(input) {
-        var _a, _b;
-        const regex = new RegExp(`${this.projectKey}-(?<number>\\d+)`, "i");
-        const match = input.match(regex);
-        if (!((_a = match === null || match === void 0 ? void 0 : match.groups) === null || _a === void 0 ? void 0 : _a.number)) {
-            return undefined;
-        }
-        return new JiraKey(this.projectKey, (_b = match === null || match === void 0 ? void 0 : match.groups) === null || _b === void 0 ? void 0 : _b.number);
+        /**
+         * Allows for grabbing of multiple keys when given as the follwoing
+         *  jira-project-key: |-
+                foo
+                bar
+        * or 1 key if given only as
+            jira-project-key: foo
+        */
+        const keys = this.projectKey
+            .split(/[\r\n]/)
+            .map(input => input.trim())
+            .filter(input => input !== ''); // grab 1 or many project keys
+        let matchingKey = undefined;
+        keys.forEach(projectKey => {
+            var _a, _b;
+            const regex = new RegExp(`${projectKey}-(?<number>\\d+)`, "i");
+            const match = input.match(regex);
+            if ((_a = match === null || match === void 0 ? void 0 : match.groups) === null || _a === void 0 ? void 0 : _a.number) {
+                matchingKey = new JiraKey(projectKey, (_b = match === null || match === void 0 ? void 0 : match.groups) === null || _b === void 0 ? void 0 : _b.number);
+            }
+        });
+        return matchingKey;
     }
     getIssue(key) {
         var _a;

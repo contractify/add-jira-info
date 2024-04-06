@@ -93,6 +93,14 @@ Various inputs are defined in [`action.yml`](action.yml) to let you configure th
 
 Tokens are private, so it's suggested adding them as [GitHub secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets).
 
+## Muliple Jira Project keys
+If you have muliple projects being used in the repo, you can add each poject key to the `jira-project-key` option as follows:
+```
+jira-project-key: |-
+                foo
+                bar
+```
+
 ## In Detail
 
 ### Getting the Jira key from the branch name

@@ -112,3 +112,54 @@ describe("extract jira key", () => {
     expect(jiraKey).toBeUndefined();
   });
 });
+
+describe("extract jira key when given multiple keys", () => {
+  let client: JiraClient;
+
+  beforeEach(() => {
+    client = new JiraClient("base-url", "username", "token", "PRJ\n FOO\n BAR\n");
+  });
+
+  it("extracts the jira key if present", () => {
+    const jiraKey = client.extractJiraKey(
+      "PRJ-3721_actions-workflow-improvements",
+    );
+    expect(jiraKey?.toString()).toBe("PRJ-3721");
+  });
+
+  it("extracts the jira key if present", () => {
+    const jiraKey = client.extractJiraKey(
+      "FOO-3721_actions-workflow-improvements",
+    );
+    expect(jiraKey?.toString()).toBe("FOO-3721");
+  });
+
+  it("extracts the jira key if present without underscore", () => {
+    const jiraKey = client.extractJiraKey(
+      "PRJ-3721-actions-workflow-improvements",
+    );
+    expect(jiraKey?.toString()).toBe("PRJ-3721");
+  });
+
+  it("extracts the jira key from a feature branch if present", () => {
+    const jiraKey = client.extractJiraKey(
+      "feature/BAR-3721_actions-workflow-improvements",
+    );
+    expect(jiraKey?.toString()).toBe("BAR-3721");
+  });
+
+  it("extracts the jira key case insensitive", () => {
+    const jiraKey = client.extractJiraKey(
+      "PRJ-3721_actions-workflow-improvements",
+    );
+    expect(jiraKey?.toString()).toBe("PRJ-3721");
+  });
+
+  it("returns undefined if not present", () => {
+    const jiraKey = client.extractJiraKey(
+      "prj3721_actions-workflow-improvements",
+    );
+    expect(jiraKey).toBeUndefined();
+  });
+
+});
