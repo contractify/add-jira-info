@@ -64,8 +64,8 @@ class GithubClient {
         return (((_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.head.ref) || github.context.ref).replace("refs/heads/", "");
     }
     getPullRequest() {
-        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
             try {
                 if ((_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number) {
                     return this.getPullRequestByNumber((_b = github.context.payload.pull_request) === null || _b === void 0 ? void 0 : _b.number);
@@ -78,9 +78,9 @@ class GithubClient {
             }
         });
     }
-    createLabel(label, description = "", color = "FBCA04") {
-        var _a;
-        return __awaiter(this, void 0, void 0, function* () {
+    createLabel(label_1) {
+        return __awaiter(this, arguments, void 0, function* (label, description = "", color = "FBCA04") {
+            var _a;
             try {
                 yield this.client.rest.issues.createLabel({
                     owner: this.owner,
@@ -99,8 +99,8 @@ class GithubClient {
         });
     }
     labelExists(label) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a;
             try {
                 yield this.client.rest.issues.getLabel({
                     owner: this.owner,
@@ -145,8 +145,8 @@ class GithubClient {
         });
     }
     getPullRequestByNumber(number) {
-        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
             try {
                 const response = yield this.client.rest.pulls.get({
                     owner: this.owner,
@@ -164,8 +164,8 @@ class GithubClient {
         });
     }
     getPullRequestAssociatedWithCommit(sha) {
-        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
             try {
                 const response = yield this.client.rest.repos.listPullRequestsAssociatedWithCommit({
                     owner: this.owner,
@@ -279,8 +279,8 @@ class JiraClient {
         return matchingKey;
     }
     getIssue(key) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a;
             try {
                 const res = yield this.client.get(this.getRestApiUrl(`issue/${key}?fields=issuetype,summary,fixVersions`));
                 const body = yield res.readBody();
@@ -428,7 +428,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.run = void 0;
+exports.run = run;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const github_client_1 = __nccwpck_require__(6960);
@@ -512,7 +512,6 @@ function run() {
         core.info(`📄 Finished`);
     });
 }
-exports.run = run;
 run();
 
 
