@@ -6,6 +6,10 @@ updates:
       interval: 'weekly'
     assignees:
       - "pieterclaerhout"
+    groups:
+      actions-deps:
+        patterns:
+          - "*"
 
   - package-ecosystem: "github-actions"
     directory: "/"
