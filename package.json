@@ -25,13 +25,13 @@
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.0",
     "@actions/http-client": "^2.2.3",
-    "nock": "^13.5.5"
+    "nock": "^13.5.6"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/js-yaml": "^4.0.9",
     "@types/minimatch": "^5.1.2",
-    "@types/node": "^22.8.7",
+    "@types/node": "^22.9.0",
     "@vercel/ncc": "^0.38.2",
     "jest": "^29.7.0",
     "prettier": "^3.3.3",
