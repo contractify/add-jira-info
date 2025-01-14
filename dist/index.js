@@ -265,34 +265,59 @@ class JiraClient {
         });
     }
     extractJiraKey(input) {
-        /**
-         * Allows for grabbing of multiple keys when given as the follwoing
-         *  jira-project-key: |-
-                foo
-                bar
-        * or 1 key if given only as
-            jira-project-key: foo
-        */
-        const keys = this.projectKey
-            .split(/[\r\n]/)
-            .map(input => input.trim())
-            .filter(input => input !== ''); // grab 1 or many project keys
-        let matchingKey = undefined;
-        keys.forEach(projectKey => {
-            var _a, _b;
-            const regex = new RegExp(`${projectKey}-(?<number>\\d+)`, "i");
-            const match = input.match(regex);
-            if ((_a = match === null || match === void 0 ? void 0 : match.groups) === null || _a === void 0 ? void 0 : _a.number) {
-                matchingKey = new JiraKey(projectKey, (_b = match === null || match === void 0 ? void 0 : match.groups) === null || _b === void 0 ? void 0 : _b.number);
+        return __awaiter(this, void 0, void 0, function* () {
+            // if project keys are not set, fetch it using current credentials
+            if (!this.projectKey) {
+                yield this.getKeys();
+            }
+            /**
+            * Allows for grabbing of multiple keys when given as the follwoing
+            *  jira-project-key: |-
+                   foo
+                   bar
+           * or 1 key if given only as
+               jira-project-key: foo
+           */
+            const keys = this.projectKey
+                .split(/[\r\n]/)
+                .map(input => input.trim())
+                .filter(input => input !== ''); // grab 1 or many project keys
+            let matchingKey = undefined;
+            keys.forEach(projectKey => {
+                var _a, _b;
+                const regex = new RegExp(`${projectKey}-(?<number>\\d+)`, "i");
+                const match = input.match(regex);
+                if ((_a = match === null || match === void 0 ? void 0 : match.groups) === null || _a === void 0 ? void 0 : _a.number) {
+                    matchingKey = new JiraKey(projectKey, (_b = match === null || match === void 0 ? void 0 : match.groups) === null || _b === void 0 ? void 0 : _b.number);
+                }
+            });
+            return matchingKey;
+        });
+    }
+    /**
+     * Fetches all project keys from Jira for the current user
+     * @returns undefined
+     */
+    getKeys() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const res = yield this.client.get(this.getRestApiUrl(`/rest/api/3/project`));
+                const body = yield res.readBody();
+                const projects = JSON.parse(body);
+                projects.map((project) => {
+                    this.projectKey += `${project.key}\r\n`; // added as string with \r\n to be split out to an array later 
+                });
+            }
+            catch (error) {
+                console.error("Failed to fetch projects:", error);
             }
         });
-        return matchingKey;
     }
     getIssue(key) {
         return __awaiter(this, void 0, void 0, function* () {
             var _a;
             try {
-                const res = yield this.client.get(this.getRestApiUrl(`issue/${key}?fields=issuetype,summary,fixVersions`));
+                const res = yield this.client.get(this.getRestApiUrl(`/rest/api/3/issue/${key}?fields=issuetype,summary,fixVersions`));
                 const body = yield res.readBody();
                 const obj = JSON.parse(body);
                 var issuetype = undefined;
@@ -322,7 +347,7 @@ class JiraClient {
         });
     }
     getRestApiUrl(endpoint) {
-        return `${this.baseUrl}/rest/api/3/${endpoint}`;
+        return `${this.baseUrl}${endpoint}`;
     }
 }
 exports.JiraClient = JiraClient;
@@ -464,7 +489,7 @@ function run() {
         const jiraBaseUrl = core.getInput("jira-base-url", { required: true });
         const jiraUsername = core.getInput("jira-username", { required: true });
         const jiraToken = core.getInput("jira-token", { required: true });
-        const jiraProjectKey = core.getInput("jira-project-key", { required: true });
+        const jiraProjectKey = core.getInput("jira-project-key", { required: false });
         const addLabelWithIssueType = core.getBooleanInput("add-label-with-issue-type");
         const issueTypeLabelColor = core.getInput("issue-type-label-color") || "FBCA04";
         const issueTypeLabelDescription = core.getInput("issue-type-label-description") || "Jira Issue Type";
@@ -481,7 +506,7 @@ function run() {
             core.info(`🚨 Dependabot, ignoring`);
             return;
         }
-        const jiraKey = jiraClient.extractJiraKey(branchName);
+        const jiraKey = yield jiraClient.extractJiraKey(branchName);
         if (!jiraKey) {
             core.warning("⚠️ No Jira key found in branch name, exiting");
             return;

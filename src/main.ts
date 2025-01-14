@@ -15,7 +15,7 @@ export async function run() {
   const jiraBaseUrl = core.getInput("jira-base-url", { required: true });
   const jiraUsername = core.getInput("jira-username", { required: true });
   const jiraToken = core.getInput("jira-token", { required: true });
-  const jiraProjectKey = core.getInput("jira-project-key", { required: true });
+  const jiraProjectKey = core.getInput("jira-project-key", { required: false });
 
   const addLabelWithIssueType = core.getBooleanInput(
     "add-label-with-issue-type",
@@ -49,7 +49,7 @@ export async function run() {
     return;
   }
 
-  const jiraKey = jiraClient.extractJiraKey(branchName);
+  const jiraKey = await jiraClient.extractJiraKey(branchName);
 
   if (!jiraKey) {
     core.warning("⚠️ No Jira key found in branch name, exiting");

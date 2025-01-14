@@ -13,8 +13,8 @@ inputs:
     description: 'The subdomain of JIRA cloud that you use to access it. Ex: "https://your-domain.atlassian.net"'
     required: true
   jira-project-key:
-    description: "Key of project in jira. First part of issue key"
-    required: true
+    description: "Key of project in jira. First part of issue key, will grab project keys using provided jira credentials if not provided."
+    required: false
     default: ""
   add-label-with-issue-type:
     description: "If set to true, a label with the issue type from Jira will be added to the pull request"
