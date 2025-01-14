@@ -487,7 +487,7 @@ function run() {
         const jiraBaseUrl = core.getInput("jira-base-url", { required: true });
         const jiraUsername = core.getInput("jira-username", { required: true });
         const jiraToken = core.getInput("jira-token", { required: true });
-        const jiraProjectKey = core.getInput("jira-project-key", { required: true });
+        const jiraProjectKey = core.getInput("jira-project-key", { required: false });
         const addLabelWithIssueType = core.getBooleanInput("add-label-with-issue-type");
         const issueTypeLabelColor = core.getInput("issue-type-label-color") || "FBCA04";
         const issueTypeLabelDescription = core.getInput("issue-type-label-description") || "Jira Issue Type";
