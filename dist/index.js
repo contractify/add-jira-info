@@ -265,14 +265,18 @@ class JiraClient {
         });
     }
     extractJiraKey(input) {
+        // if project keys are not set, fetch it using current credentials
+        if (!this.projectKey) {
+            this.getKeys();
+        }
         /**
-         * Allows for grabbing of multiple keys when given as the follwoing
-         *  jira-project-key: |-
-                foo
-                bar
-        * or 1 key if given only as
-            jira-project-key: foo
-        */
+        * Allows for grabbing of multiple keys when given as the follwoing
+        *  jira-project-key: |-
+               foo
+               bar
+       * or 1 key if given only as
+           jira-project-key: foo
+       */
         const keys = this.projectKey
             .split(/[\r\n]/)
             .map(input => input.trim())
@@ -287,6 +291,25 @@ class JiraClient {
             }
         });
         return matchingKey;
+    }
+    /**
+     * Fetches all project keys from Jira for the current user
+     * @returns undefined
+     */
+    getKeys() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const res = yield this.client.get(this.getRestApiUrl(`/rest/api/3/project`));
+                const body = yield res.readBody();
+                const projects = JSON.parse(body);
+                projects.map((project) => {
+                    this.projectKey += `${project.key}\r\n`; // added as string with \r\n to be split out to an array later 
+                });
+            }
+            catch (error) {
+                console.error("Failed to fetch projects:", error);
+            }
+        });
     }
     getIssue(key) {
         return __awaiter(this, void 0, void 0, function* () {
