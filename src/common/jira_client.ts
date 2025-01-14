@@ -42,11 +42,11 @@ export class JiraClient {
     });
   }
 
-  extractJiraKey(input: string): JiraKey | undefined {  
+  async extractJiraKey(input: string): Promise<JiraKey | undefined> {  
    
     // if project keys are not set, fetch it using current credentials
    if (!this.projectKey) { 
-      this.getKeys()
+      await this.getKeys()
     }
 
      /** 

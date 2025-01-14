@@ -49,7 +49,7 @@ export async function run() {
     return;
   }
 
-  const jiraKey = jiraClient.extractJiraKey(branchName);
+  const jiraKey = await jiraClient.extractJiraKey(branchName);
 
   if (!jiraKey) {
     core.warning("⚠️ No Jira key found in branch name, exiting");

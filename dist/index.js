@@ -265,32 +265,34 @@ class JiraClient {
         });
     }
     extractJiraKey(input) {
-        // if project keys are not set, fetch it using current credentials
-        if (!this.projectKey) {
-            this.getKeys();
-        }
-        /**
-        * Allows for grabbing of multiple keys when given as the follwoing
-        *  jira-project-key: |-
-               foo
-               bar
-       * or 1 key if given only as
-           jira-project-key: foo
-       */
-        const keys = this.projectKey
-            .split(/[\r\n]/)
-            .map(input => input.trim())
-            .filter(input => input !== ''); // grab 1 or many project keys
-        let matchingKey = undefined;
-        keys.forEach(projectKey => {
-            var _a, _b;
-            const regex = new RegExp(`${projectKey}-(?<number>\\d+)`, "i");
-            const match = input.match(regex);
-            if ((_a = match === null || match === void 0 ? void 0 : match.groups) === null || _a === void 0 ? void 0 : _a.number) {
-                matchingKey = new JiraKey(projectKey, (_b = match === null || match === void 0 ? void 0 : match.groups) === null || _b === void 0 ? void 0 : _b.number);
+        return __awaiter(this, void 0, void 0, function* () {
+            // if project keys are not set, fetch it using current credentials
+            if (!this.projectKey) {
+                yield this.getKeys();
             }
+            /**
+            * Allows for grabbing of multiple keys when given as the follwoing
+            *  jira-project-key: |-
+                   foo
+                   bar
+           * or 1 key if given only as
+               jira-project-key: foo
+           */
+            const keys = this.projectKey
+                .split(/[\r\n]/)
+                .map(input => input.trim())
+                .filter(input => input !== ''); // grab 1 or many project keys
+            let matchingKey = undefined;
+            keys.forEach(projectKey => {
+                var _a, _b;
+                const regex = new RegExp(`${projectKey}-(?<number>\\d+)`, "i");
+                const match = input.match(regex);
+                if ((_a = match === null || match === void 0 ? void 0 : match.groups) === null || _a === void 0 ? void 0 : _a.number) {
+                    matchingKey = new JiraKey(projectKey, (_b = match === null || match === void 0 ? void 0 : match.groups) === null || _b === void 0 ? void 0 : _b.number);
+                }
+            });
+            return matchingKey;
         });
-        return matchingKey;
     }
     /**
      * Fetches all project keys from Jira for the current user
@@ -504,7 +506,7 @@ function run() {
             core.info(`🚨 Dependabot, ignoring`);
             return;
         }
-        const jiraKey = jiraClient.extractJiraKey(branchName);
+        const jiraKey = yield jiraClient.extractJiraKey(branchName);
         if (!jiraKey) {
             core.warning("⚠️ No Jira key found in branch name, exiting");
             return;
