@@ -317,7 +317,7 @@ class JiraClient {
         return __awaiter(this, void 0, void 0, function* () {
             var _a;
             try {
-                const res = yield this.client.get(this.getRestApiUrl(`issue/${key}?fields=issuetype,summary,fixVersions`));
+                const res = yield this.client.get(this.getRestApiUrl(`/rest/api/3/issue/${key}?fields=issuetype,summary,fixVersions`));
                 const body = yield res.readBody();
                 const obj = JSON.parse(body);
                 var issuetype = undefined;
@@ -347,7 +347,7 @@ class JiraClient {
         });
     }
     getRestApiUrl(endpoint) {
-        return `${this.baseUrl}/rest/api/3/${endpoint}`;
+        return `${this.baseUrl}${endpoint}`;
     }
 }
 exports.JiraClient = JiraClient;
