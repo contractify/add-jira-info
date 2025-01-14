@@ -43,7 +43,13 @@ export class JiraClient {
   }
 
   extractJiraKey(input: string): JiraKey | undefined {  
-    /** 
+   
+    // if project keys are not set, fetch it using current credentials
+   if (!this.projectKey) { 
+      this.getKeys()
+    }
+
+     /** 
      * Allows for grabbing of multiple keys when given as the follwoing
      *  jira-project-key: |-
             foo
@@ -71,6 +77,31 @@ export class JiraClient {
     return matchingKey
 
   }
+
+  /**
+   * Fetches all project keys from Jira for the current user
+   * @returns undefined
+   */
+  async getKeys(): Promise<undefined> {
+
+    try {
+      const res = await this.client.get(
+        this.getRestApiUrl(`/rest/api/3/project`),
+      );
+
+      const body: string = await res.readBody();
+      const projects = JSON.parse(body);
+
+      projects.map((project: { key: string }) => {
+        this.projectKey += `${project.key}\r\n`; // added as string with \r\n to be split out to an array later 
+      });
+
+    
+    } catch (error) {
+      console.error("Failed to fetch projects:", error);
+    }
+  }
+
 
   async getIssue(key: JiraKey): Promise<JiraIssue | undefined> {
     try {
