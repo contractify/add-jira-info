@@ -25,17 +25,17 @@
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.1",
     "@actions/http-client": "^2.2.3",
-    "nock": "^14.0.5"
+    "nock": "^14.0.8"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/js-yaml": "^4.0.9",
     "@types/minimatch": "^5.1.2",
-    "@types/node": "^24.0.3",
+    "@types/node": "^24.2.0",
     "@vercel/ncc": "^0.38.3",
-    "jest": "^30.0.2",
-    "prettier": "^3.6.0",
-    "ts-jest": "^29.4.0",
-    "typescript": "^5.8.3"
+    "jest": "^30.0.5",
+    "prettier": "^3.6.2",
+    "ts-jest": "^29.4.1",
+    "typescript": "^5.9.2"
   }
 }
