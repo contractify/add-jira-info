@@ -111,6 +111,7 @@ export class JiraClient {
       );
       const body: string = await res.readBody();
       core.info(`Jira raw response: ${body}`);
+      console.log(`Jira raw response: ${body}`);
       const obj = JSON.parse(body);
 
       var issuetype: string | undefined = undefined;
