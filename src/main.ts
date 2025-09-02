@@ -85,8 +85,17 @@ export async function run() {
         );
       }
 
-      core.info(`    Adding label: ${jiraIssue.type} to: ${pullRequest}`);
-      await githubClient.addLabelsToIssue(pullRequest, [jiraIssue.type]);
+      if (!(await githubClient.labelExists(jiraIssue.key))) {
+        core.info(`    Creating label: ${jiraIssue.key}`);
+        await githubClient.createLabel(
+          jiraIssue.type,
+          "Jira Issue Number",
+          "000080",
+        );
+      }
+
+      core.info(`    Adding label: ${jiraIssue.type} and ${jiraIssue.key} to: ${pullRequest}`);
+      await githubClient.addLabelsToIssue(pullRequest, [jiraIssue.type, jiraIssue.key]);
     }
   }
 
