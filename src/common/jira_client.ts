@@ -1,5 +1,6 @@
 import { HttpClient } from "@actions/http-client";
 import { BasicCredentialHandler } from "@actions/http-client/lib/auth";
+import * as core from "@actions/core";
 
 export class JiraKey {
   constructor(
@@ -42,14 +43,14 @@ export class JiraClient {
     });
   }
 
-  async extractJiraKey(input: string): Promise<JiraKey | undefined> {  
-   
+  async extractJiraKey(input: string): Promise<JiraKey | undefined> {
+
     // if project keys are not set, fetch it using current credentials
-   if (!this.projectKey) { 
+   if (!this.projectKey) {
       await this.getKeys()
     }
 
-     /** 
+     /**
      * Allows for grabbing of multiple keys when given as the follwoing
      *  jira-project-key: |-
             foo
@@ -73,7 +74,7 @@ export class JiraClient {
       }
     });
 
-   
+
     return matchingKey
 
   }
@@ -93,10 +94,10 @@ export class JiraClient {
       const projects = JSON.parse(body);
 
       projects.map((project: { key: string }) => {
-        this.projectKey += `${project.key}\r\n`; // added as string with \r\n to be split out to an array later 
+        this.projectKey += `${project.key}\r\n`; // added as string with \r\n to be split out to an array later
       });
 
-    
+
     } catch (error) {
       console.error("Failed to fetch projects:", error);
     }
@@ -109,6 +110,7 @@ export class JiraClient {
         this.getRestApiUrl(`/rest/api/3/issue/${key}?fields=issuetype,summary,fixVersions`),
       );
       const body: string = await res.readBody();
+      core.info(`Jira raw response: ${body}`);
       const obj = JSON.parse(body);
 
       var issuetype: string | undefined = undefined;
