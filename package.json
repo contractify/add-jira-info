@@ -22,7 +22,7 @@
   "author": "Contractify",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^2.0.1",
+    "@actions/core": "^3.0.0",
     "@actions/github": "^9.0.0",
     "@actions/http-client": "^4.0.0",
     "nock": "^14.0.10"
