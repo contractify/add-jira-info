@@ -14,5 +14,8 @@ module.exports = {
   transformIgnorePatterns: [
     'node_modules/(?!@actions/http-client)'
   ],
+  moduleNameMapper: {
+    '^@actions/http-client/lib/(.*)$': '@actions/http-client/lib/$1.js'
+  },
   verbose: true,
 };
