@@ -15,7 +15,7 @@ module.exports = {
     'node_modules/(?!@actions/http-client)'
   ],
   moduleNameMapper: {
-    '^@actions/http-client/lib/(.*)$': '@actions/http-client/lib/$1.js'
+    '^@actions/http-client/lib/auth$': '<rootDir>/__mocks__/@actions/http-client/auth.ts'
   },
   verbose: true,
 };
