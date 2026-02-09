@@ -11,5 +11,8 @@ module.exports = {
       }
     }]
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!@actions/http-client)'
+  ],
   verbose: true,
 };
