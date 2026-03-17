@@ -25,6 +25,9 @@ export async function run() {
   const issueTypeLabelDescription =
     core.getInput("issue-type-label-description") || "Jira Issue Type";
   const addJiraKeyToTitle = core.getBooleanInput("add-jira-key-to-title");
+  const addIssueTypeEmojiToTitle = core.getBooleanInput(
+    "add-issue-type-emoji-to-title",
+  );
   const addJiraKeyToBody = core.getBooleanInput("add-jira-key-to-body");
   const addJiraFixVersionsToBody = core.getBooleanInput(
     "add-jira-fix-versions-to-body",
@@ -93,7 +96,7 @@ export async function run() {
   if (addJiraKeyToTitle || addJiraKeyToBody) {
     core.info(`📄 Adding Jira key to pull request`);
 
-    const updater = new Updater(jiraIssue);
+    const updater = new Updater(jiraIssue, addIssueTypeEmojiToTitle);
 
     if (addJiraKeyToTitle) {
       core.info(`    Updating pull request title`);

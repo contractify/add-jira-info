@@ -18,10 +18,15 @@ function issueTypeEmoji(type: string | undefined): string {
 }
 
 export class Updater {
-  constructor(private jiraIssue: JiraIssue) {}
+  constructor(
+    private jiraIssue: JiraIssue,
+    private addIssueTypeEmoji: boolean = true,
+  ) {}
 
   title(title: string): string {
-    const emoji = issueTypeEmoji(this.jiraIssue.type);
+    const emoji = this.addIssueTypeEmoji
+      ? issueTypeEmoji(this.jiraIssue.type)
+      : "";
     if (title.startsWith(`${emoji}${this.jiraIssue.key} | `)) {
       return title;
     }

@@ -32,6 +32,10 @@ inputs:
     description: "If set to true, the title of the pull request will be prefixed with the Jira issue key"
     default: "true"
     required: false
+  add-issue-type-emoji-to-title:
+    description: "If set to true, an emoji representing the Jira issue type will be prepended to the pull request title"
+    default: "true"
+    required: false
   add-jira-key-to-body:
     description: "If set to true, the body of the pull request will be suffix with a link to the Jira issue"
     default: "true"
