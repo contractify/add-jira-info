@@ -1,27 +1,45 @@
 import { JiraIssue } from "./jira_client";
 
+const ISSUE_TYPE_EMOJI: Record<string, string> = {
+  bug: "🐛",
+  story: "📖",
+  task: "✅",
+  epic: "🚀",
+  subtask: "🔧",
+  improvement: "💡",
+  feature: "✨",
+  spike: "🔍",
+};
+
+function issueTypeEmoji(type: string | undefined): string {
+  if (!type) return "";
+  const emoji = ISSUE_TYPE_EMOJI[type.toLowerCase()];
+  return emoji ? `${emoji} ` : "";
+}
+
 export class Updater {
   constructor(private jiraIssue: JiraIssue) {}
 
   title(title: string): string {
-    if (title.startsWith(`${this.jiraIssue.key} | `)) {
+    const emoji = issueTypeEmoji(this.jiraIssue.type);
+    if (title.startsWith(`${emoji}${this.jiraIssue.key} | `)) {
       return title;
     }
 
     const patternsToStrip = [
-      `^${this.jiraIssue.key.project} ${this.jiraIssue.key.number}`,
-      `^${this.jiraIssue.key.project}-${this.jiraIssue.key.number}`,
+      `^\\P{L}*${this.jiraIssue.key.project} ${this.jiraIssue.key.number}`,
+      `^\\P{L}*${this.jiraIssue.key.project}-${this.jiraIssue.key.number}`,
       `${this.jiraIssue.key}$`,
     ];
 
     for (const pattern of patternsToStrip) {
-      const regex = new RegExp(`${pattern}`, "i");
+      const regex = new RegExp(`${pattern}`, "iu");
       title = title.replace(regex, "").trim();
       title = title.replace(/^\|+/, "").trim();
       title = title.replace(/\|+$/, "").trim();
     }
 
-    return `${this.jiraIssue.key} | ${title}`;
+    return `${emoji}${this.jiraIssue.key} | ${title}`;
   }
 
   body(body: string | undefined): string | undefined {

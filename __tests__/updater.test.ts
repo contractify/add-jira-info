@@ -14,56 +14,81 @@ describe("title", () => {
     const title = "My pull request title";
 
     const actual = updater.title(title);
-    expect(actual).toBe("PRJ-1234 | My pull request title");
+    expect(actual).toBe("📖 PRJ-1234 | My pull request title");
   });
 
   it("fixes the jira number if present incorrect case", () => {
     const title = "Prj 1234 protect web app with a login screen";
 
     const actual = updater.title(title);
-    expect(actual).toBe("PRJ-1234 | protect web app with a login screen");
+    expect(actual).toBe("📖 PRJ-1234 | protect web app with a login screen");
   });
 
   it("fixes the jira number if present case correct case", () => {
     const title = "PRJ 1234 protect web app with a login screen";
 
     const actual = updater.title(title);
-    expect(actual).toBe("PRJ-1234 | protect web app with a login screen");
+    expect(actual).toBe("📖 PRJ-1234 | protect web app with a login screen");
   });
 
   it("fixes the jira number if present incorrect case with pipe symbol", () => {
     const title = "Prj 1234 | protect web app with a login screen";
 
     const actual = updater.title(title);
-    expect(actual).toBe("PRJ-1234 | protect web app with a login screen");
+    expect(actual).toBe("📖 PRJ-1234 | protect web app with a login screen");
   });
 
   it("fixes the missing pipe symbol", () => {
     const title = "PRJ-1234 My pull request title";
 
     const actual = updater.title(title);
-    expect(actual).toBe("PRJ-1234 | My pull request title");
+    expect(actual).toBe("📖 PRJ-1234 | My pull request title");
   });
 
-  it("does nothing when the jira number is already present", () => {
+  it("does nothing when the jira number and emoji are already present", () => {
+    const title = "📖 PRJ-1234 | My pull request title";
+
+    const actual = updater.title(title);
+    expect(actual).toBe("📖 PRJ-1234 | My pull request title");
+  });
+
+  it("adds the emoji when only the jira number is present without emoji", () => {
     const title = "PRJ-1234 | My pull request title";
 
     const actual = updater.title(title);
-    expect(actual).toBe("PRJ-1234 | My pull request title");
+    expect(actual).toBe("📖 PRJ-1234 | My pull request title");
   });
 
   it("updates if the jira key is at the end of the title", () => {
     const title = "My pull request title | PRJ-1234";
 
     const actual = updater.title(title);
-    expect(actual).toBe("PRJ-1234 | My pull request title");
+    expect(actual).toBe("📖 PRJ-1234 | My pull request title");
   });
 
   it("does not replace the key in the middle of the title", () => {
     const title = "PRJ-1234 | My pull request PRJ-1234 title";
 
     const actual = updater.title(title);
-    expect(actual).toBe("PRJ-1234 | My pull request PRJ-1234 title");
+    expect(actual).toBe("📖 PRJ-1234 | My pull request PRJ-1234 title");
+  });
+
+  it("adds no emoji for unknown issue types", () => {
+    const jiraKey = new JiraKey("PRJ", "1234");
+    const jiraIssue = new JiraIssue(jiraKey, "http://jira", "title", "unknown");
+    const updaterUnknown = new Updater(jiraIssue);
+
+    const actual = updaterUnknown.title("My pull request title");
+    expect(actual).toBe("PRJ-1234 | My pull request title");
+  });
+
+  it("adds no emoji when issue type is undefined", () => {
+    const jiraKey = new JiraKey("PRJ", "1234");
+    const jiraIssue = new JiraIssue(jiraKey, "http://jira", "title", undefined);
+    const updaterNoType = new Updater(jiraIssue);
+
+    const actual = updaterNoType.title("My pull request title");
+    expect(actual).toBe("PRJ-1234 | My pull request title");
   });
 });
 
