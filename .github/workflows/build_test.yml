@@ -17,10 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Setup node 23
+      - name: Setup node 24
         uses: actions/setup-node@v6
         with:
-          node-version: 23.x
+          node-version: 24.x
       - run: npm install
       - run: npm run build
       - run: npm test
