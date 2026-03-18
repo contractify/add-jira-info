@@ -36453,26 +36453,46 @@ class JiraClient {
 }
 
 ;// CONCATENATED MODULE: ./lib/common/updater.js
+const ISSUE_TYPE_EMOJI = {
+    bug: "🐛",
+    story: "📖",
+    task: "✅",
+    epic: "🚀",
+    subtask: "🔧",
+    improvement: "💡",
+    feature: "✨",
+    spike: "🔍",
+};
+function issueTypeEmoji(type) {
+    if (!type)
+        return "";
+    const emoji = ISSUE_TYPE_EMOJI[type.toLowerCase()];
+    return emoji ? `${emoji} ` : "";
+}
 class Updater {
-    constructor(jiraIssue) {
+    constructor(jiraIssue, addIssueTypeEmoji = true) {
         this.jiraIssue = jiraIssue;
+        this.addIssueTypeEmoji = addIssueTypeEmoji;
     }
     title(title) {
-        if (title.startsWith(`${this.jiraIssue.key} | `)) {
+        const emoji = this.addIssueTypeEmoji
+            ? issueTypeEmoji(this.jiraIssue.type)
+            : "";
+        if (title.startsWith(`${emoji}${this.jiraIssue.key} | `)) {
             return title;
         }
         const patternsToStrip = [
-            `^${this.jiraIssue.key.project} ${this.jiraIssue.key.number}`,
-            `^${this.jiraIssue.key.project}-${this.jiraIssue.key.number}`,
+            `^\\P{L}*${this.jiraIssue.key.project} ${this.jiraIssue.key.number}`,
+            `^\\P{L}*${this.jiraIssue.key.project}-${this.jiraIssue.key.number}`,
             `${this.jiraIssue.key}$`,
         ];
         for (const pattern of patternsToStrip) {
-            const regex = new RegExp(`${pattern}`, "i");
+            const regex = new RegExp(`${pattern}`, "iu");
             title = title.replace(regex, "").trim();
             title = title.replace(/^\|+/, "").trim();
             title = title.replace(/\|+$/, "").trim();
         }
-        return `${this.jiraIssue.key} | ${title}`;
+        return `${emoji}${this.jiraIssue.key} | ${title}`;
     }
     body(body) {
         if ((body === null || body === void 0 ? void 0 : body.includes(`${this.jiraIssue.key}`)) &&
@@ -36542,6 +36562,7 @@ function run() {
         const issueTypeLabelColor = getInput("issue-type-label-color") || "FBCA04";
         const issueTypeLabelDescription = getInput("issue-type-label-description") || "Jira Issue Type";
         const addJiraKeyToTitle = getBooleanInput("add-jira-key-to-title");
+        const addIssueTypeEmojiToTitle = getBooleanInput("add-issue-type-emoji-to-title");
         const addJiraKeyToBody = getBooleanInput("add-jira-key-to-body");
         const addJiraFixVersionsToBody = getBooleanInput("add-jira-fix-versions-to-body");
         const githubClient = new GithubClient(githubToken);
@@ -36587,7 +36608,7 @@ function run() {
         }
         if (addJiraKeyToTitle || addJiraKeyToBody) {
             info(`📄 Adding Jira key to pull request`);
-            const updater = new Updater(jiraIssue);
+            const updater = new Updater(jiraIssue, addIssueTypeEmojiToTitle);
             if (addJiraKeyToTitle) {
                 info(`    Updating pull request title`);
                 pullRequest.title = updater.title(pullRequest.title);
