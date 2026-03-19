@@ -22,16 +22,23 @@
 		{
 			"type": "npm",
 			"script": "test",
-      "problemMatcher": [],
-      "label": "npm: tests",
+			"problemMatcher": [],
+			"label": "npm: tests",
 			"detail": "npm run test -- --silent=false"
 		},
 		{
+			"type": "npm",
+			"script": "build",
+			"problemMatcher": [],
+			"label": "npm: build",
+			"detail": "npm run build"
+		},
+		{
 			"type": "shell",
-      "problemMatcher": [],
-      "label": "git: update tag",
-      "detail": "git tag -fa v1 -m 'Update v1 tag' && git push origin v1 --force",
-      "command": "git tag -fa v1 -m 'Update v1 tag' && git push origin v1 --force"
+			"problemMatcher": [],
+			"label": "git: update tag",
+			"detail": "git tag -fa v1 -m 'Update v1 tag' && git push origin v1 --force",
+			"command": "git tag -fa v1 -m 'Update v1 tag' && git push origin v1 --force"
 		}
 	]
 }

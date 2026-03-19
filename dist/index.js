@@ -36495,6 +36495,10 @@ class Updater {
         return `${emoji}${this.jiraIssue.key} | ${title}`;
     }
     body(body) {
+        if (body) {
+            const partialKeyRegex = new RegExp(`${this.jiraIssue.key.project}-(?=\\n)`, "gi");
+            body = body.replace(partialKeyRegex, `${this.jiraIssue.key}`);
+        }
         if ((body === null || body === void 0 ? void 0 : body.includes(`${this.jiraIssue.key}`)) &&
             !(body === null || body === void 0 ? void 0 : body.includes(`References ${this.jiraIssue.key}`))) {
             return body;
