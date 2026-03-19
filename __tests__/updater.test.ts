@@ -152,6 +152,27 @@ describe("body", () => {
     expect(actual).toBe("PRJ-1234\n\ntest");
   });
 
+  it("replaces a partial key followed by a newline with the full key", () => {
+    const body = "Implements PRJ-\nSome more text";
+
+    const actual = updater.body(body);
+    expect(actual).toBe("Implements PRJ-1234\nSome more text");
+  });
+
+  it("replaces multiple partial keys followed by newlines with the full key", () => {
+    const body = "See PRJ-\nAnd also PRJ-\nDone";
+
+    const actual = updater.body(body);
+    expect(actual).toBe("See PRJ-1234\nAnd also PRJ-1234\nDone");
+  });
+
+  it("does not replace a partial key at the end of the body (no trailing newline)", () => {
+    const body = "test\n\nPRJ-";
+
+    const actual = updater.body(body);
+    expect(actual).toBe("test\n\n[**PRJ-1234** | title](http://jira)");
+  });
+
   it("adds the fixVersions to an undefined body", () => {
     const body = undefined;
 
