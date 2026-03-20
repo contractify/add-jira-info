@@ -36496,7 +36496,7 @@ class Updater {
     }
     body(body) {
         if (body) {
-            const partialKeyRegex = new RegExp(`${this.jiraIssue.key.project}-(?=\\n)`, "gi");
+            const partialKeyRegex = new RegExp(`${this.jiraIssue.key.project}-(?=\\n|$)`, "gi");
             body = body.replace(partialKeyRegex, `${this.jiraIssue.key}`);
         }
         if ((body === null || body === void 0 ? void 0 : body.includes(`${this.jiraIssue.key}`)) &&
