@@ -42,14 +42,13 @@ export class JiraClient {
     });
   }
 
-  async extractJiraKey(input: string): Promise<JiraKey | undefined> {  
-   
+  async extractJiraKey(input: string): Promise<JiraKey | undefined> {
     // if project keys are not set, fetch it using current credentials
-   if (!this.projectKey) { 
-      await this.getKeys()
+    if (!this.projectKey) {
+      await this.getKeys();
     }
 
-     /** 
+    /** 
      * Allows for grabbing of multiple keys when given as the follwoing
      *  jira-project-key: |-
             foo
@@ -58,24 +57,22 @@ export class JiraClient {
         jira-project-key: foo
     */
     const keys = this.projectKey
-    .split(/[\r\n]/)
-    .map(input => input.trim())
-    .filter(input => input !== ''); // grab 1 or many project keys
+      .split(/[\r\n]/)
+      .map((input) => input.trim())
+      .filter((input) => input !== ""); // grab 1 or many project keys
 
-    let matchingKey: JiraKey | undefined = undefined
+    let matchingKey: JiraKey | undefined = undefined;
 
-    keys.forEach(projectKey => {
+    keys.forEach((projectKey) => {
       const regex = new RegExp(`${projectKey}-(?<number>\\d+)`, "i");
       const match = input.match(regex);
 
       if (match?.groups?.number) {
-        matchingKey = new JiraKey(projectKey, match?.groups?.number)
+        matchingKey = new JiraKey(projectKey, match?.groups?.number);
       }
     });
 
-   
-    return matchingKey
-
+    return matchingKey;
   }
 
   /**
@@ -83,7 +80,6 @@ export class JiraClient {
    * @returns undefined
    */
   async getKeys(): Promise<undefined> {
-
     try {
       const res = await this.client.get(
         this.getRestApiUrl(`/rest/api/3/project`),
@@ -93,20 +89,19 @@ export class JiraClient {
       const projects = JSON.parse(body);
 
       projects.map((project: { key: string }) => {
-        this.projectKey += `${project.key}\r\n`; // added as string with \r\n to be split out to an array later 
+        this.projectKey += `${project.key}\r\n`; // added as string with \r\n to be split out to an array later
       });
-
-    
     } catch (error) {
       console.error("Failed to fetch projects:", error);
     }
   }
 
-
   async getIssue(key: JiraKey): Promise<JiraIssue | undefined> {
     try {
       const res = await this.client.get(
-        this.getRestApiUrl(`/rest/api/3/issue/${key}?fields=issuetype,summary,fixVersions`),
+        this.getRestApiUrl(
+          `/rest/api/3/issue/${key}?fields=issuetype,summary,fixVersions`,
+        ),
       );
       const body: string = await res.readBody();
       const obj = JSON.parse(body);

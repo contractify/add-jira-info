@@ -7,7 +7,7 @@ class GithubPullRequest {
   constructor(
     public number: number,
     public title: string,
-    public body: string | undefined
+    public body: string | undefined,
   ) {}
 
   toString(): string {
@@ -36,7 +36,7 @@ export class GithubClient {
     try {
       if (github.context.payload.pull_request?.number) {
         return this.getPullRequestByNumber(
-          github.context.payload.pull_request?.number
+          github.context.payload.pull_request?.number,
         );
       }
       return this.getPullRequestAssociatedWithCommit(github.context.sha);
@@ -49,7 +49,7 @@ export class GithubClient {
   async createLabel(
     label: string,
     description: string = "",
-    color: string = "FBCA04"
+    color: string = "FBCA04",
   ): Promise<void> {
     try {
       await this.client.rest.issues.createLabel({
@@ -85,7 +85,7 @@ export class GithubClient {
 
   async addLabelsToIssue(
     pullRequest: GithubPullRequest,
-    labels: string[]
+    labels: string[],
   ): Promise<void> {
     try {
       await this.client.rest.issues.addLabels({
@@ -111,7 +111,7 @@ export class GithubClient {
   }
 
   private async getPullRequestByNumber(
-    number: number
+    number: number,
   ): Promise<GithubPullRequest | undefined> {
     try {
       const response = await this.client.rest.pulls.get({
@@ -123,7 +123,7 @@ export class GithubClient {
       return new GithubPullRequest(
         response.data.number,
         response.data.title.trim(),
-        response.data.body?.trim()
+        response.data.body?.trim(),
       );
     } catch (error: any) {
       if (error.response?.status === 404) {
@@ -134,7 +134,7 @@ export class GithubClient {
   }
 
   private async getPullRequestAssociatedWithCommit(
-    sha: string
+    sha: string,
   ): Promise<GithubPullRequest | undefined> {
     try {
       const response =
@@ -157,7 +157,7 @@ export class GithubClient {
       return new GithubPullRequest(
         pullRequest.number,
         pullRequest.title.trim(),
-        pullRequest.body?.trim()
+        pullRequest.body?.trim(),
       );
     } catch (error: any) {
       if (error.response?.status === 404) {

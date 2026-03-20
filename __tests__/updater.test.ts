@@ -124,11 +124,11 @@ describe("body", () => {
     expect(actual).toBe("test\n\n[**PRJ-1234** | title](http://jira)");
   });
 
-  it("adds the key to an existing body with suffix", () => {
+  it("replaces a partial key (project key + dash) at end of body with the full key", () => {
     const body = "test\n\nPRJ-";
 
     const actual = updater.body(body);
-    expect(actual).toBe("test\n\n[**PRJ-1234** | title](http://jira)");
+    expect(actual).toBe("test\n\nPRJ-1234");
   });
 
   it("adds the key to an existing body with reference to ticket", () => {
@@ -166,11 +166,11 @@ describe("body", () => {
     expect(actual).toBe("See PRJ-1234\nAnd also PRJ-1234\nDone");
   });
 
-  it("does not replace a partial key at the end of the body (no trailing newline)", () => {
+  it("replaces a partial key at the end of the body (no trailing newline)", () => {
     const body = "test\n\nPRJ-";
 
     const actual = updater.body(body);
-    expect(actual).toBe("test\n\n[**PRJ-1234** | title](http://jira)");
+    expect(actual).toBe("test\n\nPRJ-1234");
   });
 
   it("adds the fixVersions to an undefined body", () => {

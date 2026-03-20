@@ -117,7 +117,12 @@ describe("extract jira key when given multiple keys", () => {
   let client: JiraClient;
 
   beforeEach(() => {
-    client = new JiraClient("base-url", "username", "token", "PRJ\n FOO\n BAR\n");
+    client = new JiraClient(
+      "base-url",
+      "username",
+      "token",
+      "PRJ\n FOO\n BAR\n",
+    );
   });
 
   it("extracts the jira key if present", async () => {
@@ -161,5 +166,4 @@ describe("extract jira key when given multiple keys", () => {
     );
     expect(jiraKey).toBeUndefined();
   });
-
 });
