@@ -36372,19 +36372,19 @@ class JiraClient {
                 yield this.getKeys();
             }
             /**
-            * Allows for grabbing of multiple keys when given as the follwoing
-            *  jira-project-key: |-
-                   foo
-                   bar
-           * or 1 key if given only as
-               jira-project-key: foo
-           */
+             * Allows for grabbing of multiple keys when given as the follwoing
+             *  jira-project-key: |-
+                    foo
+                    bar
+            * or 1 key if given only as
+                jira-project-key: foo
+            */
             const keys = this.projectKey
                 .split(/[\r\n]/)
-                .map(input => input.trim())
-                .filter(input => input !== ''); // grab 1 or many project keys
+                .map((input) => input.trim())
+                .filter((input) => input !== ""); // grab 1 or many project keys
             let matchingKey = undefined;
-            keys.forEach(projectKey => {
+            keys.forEach((projectKey) => {
                 var _a, _b;
                 const regex = new RegExp(`${projectKey}-(?<number>\\d+)`, "i");
                 const match = input.match(regex);
@@ -36406,7 +36406,7 @@ class JiraClient {
                 const body = yield res.readBody();
                 const projects = JSON.parse(body);
                 projects.map((project) => {
-                    this.projectKey += `${project.key}\r\n`; // added as string with \r\n to be split out to an array later 
+                    this.projectKey += `${project.key}\r\n`; // added as string with \r\n to be split out to an array later
                 });
             }
             catch (error) {
