@@ -173,6 +173,33 @@ describe("body", () => {
     expect(actual).toBe("test\n\nPRJ-1234");
   });
 
+  it("replaces a partial key followed by a Windows-style newline (\\r\\n) with the full key", () => {
+    const body = "Implements PRJ-\r\nSome more text";
+
+    const actual = updater.body(body);
+    expect(actual).toBe("Implements PRJ-1234\r\nSome more text");
+  });
+
+  it("replaces multiple partial keys followed by Windows-style newlines with the full key", () => {
+    const body = "See PRJ-\r\nAnd also PRJ-\r\nBut also PRJ-\nDone";
+
+    const actual = updater.body(body);
+    expect(actual).toBe("See PRJ-1234\r\nAnd also PRJ-1234\r\nBut also PRJ-1234\nDone");
+  });
+
+  it("replaces a partial key in a PR template with Windows-style newlines (CTR project)", () => {
+    const jiraKey = new JiraKey("CTR", "5678");
+    const jiraIssue = new JiraIssue(jiraKey, "http://jira", "title", "story");
+    const ctrUpdater = new Updater(jiraIssue);
+
+    const body = "Some changes\r\n\r\nReferences CTR-";
+
+    const actual = ctrUpdater.body(body);
+    expect(actual).toBe(
+      "Some changes\n\n[**CTR-5678** | title](http://jira)",
+    );
+  });
+
   it("adds the fixVersions to an undefined body", () => {
     const body = undefined;
 

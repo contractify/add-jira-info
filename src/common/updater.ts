@@ -50,8 +50,8 @@ export class Updater {
   body(body: string | undefined): string | undefined {
     if (body) {
       const partialKeyRegex = new RegExp(
-        `${this.jiraIssue.key.project}-(?=\\n|$)`,
-        "gi",
+        `${this.jiraIssue.key.project}-(?=$)`,
+        "gim",
       );
       body = body.replace(partialKeyRegex, `${this.jiraIssue.key}`);
     }
