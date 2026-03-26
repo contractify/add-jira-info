@@ -187,6 +187,34 @@ describe("body", () => {
     expect(actual).toBe("See PRJ-1234\r\nAnd also PRJ-1234\r\nBut also PRJ-1234\nDone");
   });
 
+  it("does not replace a lowercase partial key followed by a newline", () => {
+    const body = "Implements prj-\nSome more text";
+
+    const actual = updater.body(body);
+    expect(actual).toBe("Implements prj-\nSome more text\n\n[**PRJ-1234** | title](http://jira)");
+  });
+
+  it("does replace a partial key followed by a space", () => {
+    const body = "Release notes for PRJ- are generated";
+
+    const actual = updater.body(body);
+    expect(actual).toBe("Release notes for PRJ- are generated\n\n[**PRJ-1234** | title](http://jira)");
+  });
+
+  it("does not replace a mixed-case partial key followed by a newline", () => {
+    const body = "Implements Prj-\nSome more text";
+
+    const actual = updater.body(body);
+    expect(actual).toBe("Implements Prj-\nSome more text\n\n[**PRJ-1234** | title](http://jira)");
+  });
+
+  it("does not replace a lowercase partial key at end of body", () => {
+    const body = "test\n\nprj-";
+
+    const actual = updater.body(body);
+    expect(actual).toBe("test\n\nprj-\n\n[**PRJ-1234** | title](http://jira)");
+  });
+
   it("replaces a partial key in a PR template with Windows-style newlines (CTR project)", () => {
     const jiraKey = new JiraKey("CTR", "5678");
     const jiraIssue = new JiraIssue(jiraKey, "http://jira", "title", "story");

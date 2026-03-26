@@ -51,7 +51,7 @@ export class Updater {
     if (body) {
       const partialKeyRegex = new RegExp(
         `${this.jiraIssue.key.project}-(?=$)`,
-        "gim",
+        "gm",
       );
       body = body.replace(partialKeyRegex, `${this.jiraIssue.key}`);
     }
@@ -67,15 +67,15 @@ export class Updater {
       body = "";
     }
 
-    const patternsToStrip = [
-      `References ${this.jiraIssue.key}$`,
-      `References ${this.jiraIssue.key.project}-$`,
-      `${this.jiraIssue.key.project}-$`,
-      `${this.jiraIssue.key}$`,
+    const patternsToStrip: Array<[string, string]> = [
+      [`References ${this.jiraIssue.key}$`, "i"],
+      [`References ${this.jiraIssue.key.project}-$`, ""],
+      [`${this.jiraIssue.key.project}-$`, ""],
+      [`${this.jiraIssue.key}$`, "i"],
     ];
 
-    for (const pattern of patternsToStrip) {
-      const regex = new RegExp(`${pattern}`, "i");
+    for (const [pattern, flags] of patternsToStrip) {
+      const regex = new RegExp(`${pattern}`, flags);
       body = body.replace(regex, "").trim();
     }
 

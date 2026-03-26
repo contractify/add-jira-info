@@ -36496,7 +36496,7 @@ class Updater {
     }
     body(body) {
         if (body) {
-            const partialKeyRegex = new RegExp(`${this.jiraIssue.key.project}-(?=$)`, "gim");
+            const partialKeyRegex = new RegExp(`${this.jiraIssue.key.project}-(?=$)`, "gm");
             body = body.replace(partialKeyRegex, `${this.jiraIssue.key}`);
         }
         if ((body === null || body === void 0 ? void 0 : body.includes(`${this.jiraIssue.key}`)) &&
@@ -36507,13 +36507,13 @@ class Updater {
             body = "";
         }
         const patternsToStrip = [
-            `References ${this.jiraIssue.key}$`,
-            `References ${this.jiraIssue.key.project}-$`,
-            `${this.jiraIssue.key.project}-$`,
-            `${this.jiraIssue.key}$`,
+            [`References ${this.jiraIssue.key}$`, "i"],
+            [`References ${this.jiraIssue.key.project}-$`, ""],
+            [`${this.jiraIssue.key.project}-$`, ""],
+            [`${this.jiraIssue.key}$`, "i"],
         ];
-        for (const pattern of patternsToStrip) {
-            const regex = new RegExp(`${pattern}`, "i");
+        for (const [pattern, flags] of patternsToStrip) {
+            const regex = new RegExp(`${pattern}`, flags);
             body = body.replace(regex, "").trim();
         }
         return `${body}\n\n[**${this.jiraIssue.key}** | ${this.jiraIssue.title}](${this.jiraIssue.link})`.trim();
