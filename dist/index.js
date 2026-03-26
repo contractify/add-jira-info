@@ -36506,6 +36506,8 @@ class Updater {
         if (!body) {
             body = "";
         }
+        const inlinePartialKeyRegex = new RegExp(`${this.jiraIssue.key.project}-(?!\\d)`, "g");
+        body = body.replace(inlinePartialKeyRegex, `${this.jiraIssue.key}`);
         const patternsToStrip = [
             [`References ${this.jiraIssue.key}$`, "i"],
             [`References ${this.jiraIssue.key.project}-$`, ""],

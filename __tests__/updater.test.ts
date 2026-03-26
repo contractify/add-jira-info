@@ -198,7 +198,7 @@ describe("body", () => {
     const body = "Release notes for PRJ- are generated";
 
     const actual = updater.body(body);
-    expect(actual).toBe("Release notes for PRJ- are generated\n\n[**PRJ-1234** | title](http://jira)");
+    expect(actual).toBe("Release notes for PRJ-1234 are generated\n\n[**PRJ-1234** | title](http://jira)");
   });
 
   it("does not replace a mixed-case partial key followed by a newline", () => {
