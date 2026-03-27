@@ -60,6 +60,7 @@ jobs:
           issue-type-label-color: FBCA04
           issue-type-label-description: "Jira Issue Type"
           add-jira-key-to-title: true
+          add-issue-type-emoji-to-title: true
           add-jira-key-to-body: true
           add-jira-fix-versions-to-body: true
 ```
@@ -88,6 +89,7 @@ Various inputs are defined in [`action.yml`](action.yml) to let you configure th
 | `issue-type-label-color`        | The hex color to use for the issue type label                                                                                                             | `false`  | `FBCA04`          |
 | `issue-type-label-description`  | The description to use for the issue type label                                                                                                           | `false`  | `Jira Issue Type` |
 | `add-jira-key-to-title`         | If set to `true`, the title of the pull request will be prefixed with the Jira issue key                                                                  | `false`  | `true`            |
+| `add-issue-type-emoji-to-title` | If set to `true`, an emoji representing the Jira issue type will be prepended to the pull request title                                                   | `false`  | `true`            |
 | `add-jira-key-to-body`          | If set to `true`, the body of the pull request will be suffix with a link to the Jira issue                                                               | `false`  | `true`            |
 | `add-jira-fix-versions-to-body` | If set to `true`, the body of the pull request will be suffix with the `fixVersions` from to the Jira issue                                               | `false`  | `true`            |
 
