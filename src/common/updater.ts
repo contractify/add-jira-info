@@ -13,8 +13,8 @@ const ISSUE_TYPE_EMOJI: Record<string, string> = {
 
 function issueTypeEmoji(type: string | undefined): string {
   if (!type) return "";
-  const emoji = ISSUE_TYPE_EMOJI[type.toLowerCase()];
-  return emoji ? `${emoji} ` : "";
+  const emoji = ISSUE_TYPE_EMOJI[type.toLowerCase()] ?? "🎫";
+  return `${emoji} `;
 }
 
 export class Updater {

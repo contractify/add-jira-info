@@ -36464,10 +36464,11 @@ const ISSUE_TYPE_EMOJI = {
     spike: "🔍",
 };
 function issueTypeEmoji(type) {
+    var _a;
     if (!type)
         return "";
-    const emoji = ISSUE_TYPE_EMOJI[type.toLowerCase()];
-    return emoji ? `${emoji} ` : "";
+    const emoji = (_a = ISSUE_TYPE_EMOJI[type.toLowerCase()]) !== null && _a !== void 0 ? _a : "🎫";
+    return `${emoji} `;
 }
 class Updater {
     constructor(jiraIssue, addIssueTypeEmoji = true) {

@@ -73,13 +73,13 @@ describe("title", () => {
     expect(actual).toBe("📖 PRJ-1234 | My pull request PRJ-1234 title");
   });
 
-  it("adds no emoji for unknown issue types", () => {
+  it("adds a generic emoji for unknown issue types", () => {
     const jiraKey = new JiraKey("PRJ", "1234");
     const jiraIssue = new JiraIssue(jiraKey, "http://jira", "title", "unknown");
     const updaterUnknown = new Updater(jiraIssue);
 
     const actual = updaterUnknown.title("My pull request title");
-    expect(actual).toBe("PRJ-1234 | My pull request title");
+    expect(actual).toBe("🎫 PRJ-1234 | My pull request title");
   });
 
   it("adds no emoji when issue type is undefined", () => {
