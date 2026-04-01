@@ -36467,7 +36467,7 @@ function issueTypeEmoji(type) {
     var _a;
     if (!type)
         return "";
-    const emoji = (_a = ISSUE_TYPE_EMOJI[type.toLowerCase()]) !== null && _a !== void 0 ? _a : "🎫";
+    const emoji = (_a = ISSUE_TYPE_EMOJI[type.toLowerCase()]) !== null && _a !== void 0 ? _a : "🔧";
     return `${emoji} `;
 }
 class Updater {

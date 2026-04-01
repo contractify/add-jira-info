@@ -79,7 +79,7 @@ describe("title", () => {
     const updaterUnknown = new Updater(jiraIssue);
 
     const actual = updaterUnknown.title("My pull request title");
-    expect(actual).toBe("🎫 PRJ-1234 | My pull request title");
+    expect(actual).toBe("🔧 PRJ-1234 | My pull request title");
   });
 
   it("adds no emoji when issue type is undefined", () => {
@@ -184,28 +184,36 @@ describe("body", () => {
     const body = "See PRJ-\r\nAnd also PRJ-\r\nBut also PRJ-\nDone";
 
     const actual = updater.body(body);
-    expect(actual).toBe("See PRJ-1234\r\nAnd also PRJ-1234\r\nBut also PRJ-1234\nDone");
+    expect(actual).toBe(
+      "See PRJ-1234\r\nAnd also PRJ-1234\r\nBut also PRJ-1234\nDone",
+    );
   });
 
   it("does not replace a lowercase partial key followed by a newline", () => {
     const body = "Implements prj-\nSome more text";
 
     const actual = updater.body(body);
-    expect(actual).toBe("Implements prj-\nSome more text\n\n[**PRJ-1234** | title](http://jira)");
+    expect(actual).toBe(
+      "Implements prj-\nSome more text\n\n[**PRJ-1234** | title](http://jira)",
+    );
   });
 
   it("does replace a partial key followed by a space", () => {
     const body = "Release notes for PRJ- are generated";
 
     const actual = updater.body(body);
-    expect(actual).toBe("Release notes for PRJ-1234 are generated\n\n[**PRJ-1234** | title](http://jira)");
+    expect(actual).toBe(
+      "Release notes for PRJ-1234 are generated\n\n[**PRJ-1234** | title](http://jira)",
+    );
   });
 
   it("does not replace a mixed-case partial key followed by a newline", () => {
     const body = "Implements Prj-\nSome more text";
 
     const actual = updater.body(body);
-    expect(actual).toBe("Implements Prj-\nSome more text\n\n[**PRJ-1234** | title](http://jira)");
+    expect(actual).toBe(
+      "Implements Prj-\nSome more text\n\n[**PRJ-1234** | title](http://jira)",
+    );
   });
 
   it("does not replace a lowercase partial key at end of body", () => {
@@ -223,9 +231,7 @@ describe("body", () => {
     const body = "Some changes\r\n\r\nReferences CTR-";
 
     const actual = ctrUpdater.body(body);
-    expect(actual).toBe(
-      "Some changes\n\n[**CTR-5678** | title](http://jira)",
-    );
+    expect(actual).toBe("Some changes\n\n[**CTR-5678** | title](http://jira)");
   });
 
   it("adds the fixVersions to an undefined body", () => {
