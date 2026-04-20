@@ -7,7 +7,8 @@ module.exports = {
     '^.+\\.ts$': ['ts-jest', {
       tsconfig: {
         moduleResolution: 'node10',
-        module: 'commonjs'
+        module: 'commonjs',
+        types: ['jest']
       }
     }]
   },
