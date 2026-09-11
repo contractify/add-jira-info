@@ -36800,6 +36800,14 @@ const ISSUE_TYPE_EMOJI = {
     feature: "✨",
     spike: "🔍",
 };
+// Separators that may trail the key, such as the "]" in "[PRJ-1234] my title".
+// The leading "\P{L}*" of each pattern already absorbs the opening bracket, so
+// without this the closing one survives and the title becomes
+// "PRJ-1234 | ] my title".
+//
+// Letters and digits are deliberately excluded, so "[PRJ-1234] 2024 roadmap"
+// keeps its leading number.
+const TRAILING_SEPARATORS = "[\\s\\]):|,.-]*";
 function issueTypeEmoji(type) {
     var _a;
     if (!type)
@@ -36820,8 +36828,8 @@ class Updater {
             return title;
         }
         const patternsToStrip = [
-            `^\\P{L}*${this.jiraIssue.key.project} ${this.jiraIssue.key.number}`,
-            `^\\P{L}*${this.jiraIssue.key.project}-${this.jiraIssue.key.number}`,
+            `^\\P{L}*${this.jiraIssue.key.project} ${this.jiraIssue.key.number}${TRAILING_SEPARATORS}`,
+            `^\\P{L}*${this.jiraIssue.key.project}-${this.jiraIssue.key.number}${TRAILING_SEPARATORS}`,
             `${this.jiraIssue.key}$`,
         ];
         for (const pattern of patternsToStrip) {

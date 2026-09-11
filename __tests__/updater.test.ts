@@ -73,6 +73,41 @@ describe("title", () => {
     expect(actual).toBe("📖 PRJ-1234 | My pull request PRJ-1234 title");
   });
 
+  it("removes the closing bracket of a bracketed jira key", () => {
+    const title = "[PRJ-1234] My pull request title";
+
+    const actual = updater.title(title);
+    expect(actual).toBe("📖 PRJ-1234 | My pull request title");
+  });
+
+  it("removes the closing bracket of a bracketed jira key with a space", () => {
+    const title = "[PRJ 1234] My pull request title";
+
+    const actual = updater.title(title);
+    expect(actual).toBe("📖 PRJ-1234 | My pull request title");
+  });
+
+  it("removes a colon after the jira key", () => {
+    const title = "PRJ-1234: My pull request title";
+
+    const actual = updater.title(title);
+    expect(actual).toBe("📖 PRJ-1234 | My pull request title");
+  });
+
+  it("removes a parenthesised jira key", () => {
+    const title = "(PRJ-1234) My pull request title";
+
+    const actual = updater.title(title);
+    expect(actual).toBe("📖 PRJ-1234 | My pull request title");
+  });
+
+  it("keeps a number that starts the rest of the title", () => {
+    const title = "[PRJ-1234] 2024 roadmap";
+
+    const actual = updater.title(title);
+    expect(actual).toBe("📖 PRJ-1234 | 2024 roadmap");
+  });
+
   it("adds a generic emoji for unknown issue types", () => {
     const jiraKey = new JiraKey("PRJ", "1234");
     const jiraIssue = new JiraIssue(jiraKey, "http://jira", "title", "unknown");
