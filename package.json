@@ -35,7 +35,7 @@
     "@vercel/ncc": "^0.45.0",
     "jest": "^30.5.1",
     "prettier": "^3.9.9",
-    "ts-jest": "^29.4.12",
+    "ts-jest": "^29.4.13",
     "typescript": "^6.0.3"
   }
 }
