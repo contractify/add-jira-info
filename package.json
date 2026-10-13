@@ -21,11 +21,14 @@
   ],
   "author": "Contractify",
   "license": "MIT",
+  "overrides": {
+    "js-yaml": "^4.3.2"
+  },
   "dependencies": {
     "@actions/core": "^3.0.1",
     "@actions/github": "^9.1.1",
     "@actions/http-client": "^4.0.1",
-    "nock": "^15.0.1"
+    "nock": "^14.0.17"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
