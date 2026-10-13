@@ -40,5 +40,9 @@
     "prettier": "^3.9.9",
     "ts-jest": "^29.4.14",
     "typescript": "^6.0.3"
+  },
+  "allowScripts": {
+    "@parcel/watcher@2.6.0": true,
+    "unrs-resolver@1.12.2": true
   }
 }
