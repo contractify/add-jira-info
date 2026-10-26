@@ -28,14 +28,17 @@
     "@actions/core": "^3.0.1",
     "@actions/github": "^9.1.1",
     "@actions/http-client": "^4.0.1",
-    "nock": "^14.0.17"
+    "nock": "^15.0.5"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.29.7",
     "@types/jest": "^30.0.0",
     "@types/js-yaml": "^4.0.9",
     "@types/minimatch": "^5.1.2",
     "@types/node": "^26.6.5",
     "@vercel/ncc": "^0.45.0",
+    "babel-jest": "^30.5.2",
+    "babel-plugin-transform-import-meta": "^2.3.3",
     "jest": "^30.5.2",
     "prettier": "^3.9.9",
     "ts-jest": "^29.4.15",
