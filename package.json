@@ -28,7 +28,7 @@
     "@actions/core": "^3.0.1",
     "@actions/github": "^9.1.1",
     "@actions/http-client": "^4.0.1",
-    "nock": "^15.0.5"
+    "nock": "^15.0.6"
   },
   "devDependencies": {
     "@babel/core": "^8.1.0",
@@ -36,7 +36,7 @@
     "@types/jest": "^30.0.0",
     "@types/js-yaml": "^4.0.9",
     "@types/minimatch": "^5.1.2",
-    "@types/node": "^26.6.5",
+    "@types/node": "^26.6.6",
     "@vercel/ncc": "^0.45.0",
     "babel-jest": "^30.5.2",
     "babel-plugin-transform-import-meta": "^2.3.3",
