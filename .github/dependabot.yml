@@ -4,6 +4,11 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
+    groups:
+      babel:
+        patterns:
+          - '@babel/*'
+          - 'babel-*'
     assignees:
       - "pieterclaerhout"
 
